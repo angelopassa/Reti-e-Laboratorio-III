@@ -1,5 +1,5 @@
 public class isPrime implements Runnable {
-    private int n = 10000000;
+    private static final int n = 10000000;
     @Override
     public void run() {
         int nPrimi = 0;
@@ -17,6 +17,6 @@ public class isPrime implements Runnable {
                 nPrimi++;
             }
         }
-        System.out.println(Thread.currentThread().getName() + ": Nr. di numeri primi minori di " + this.n + " = " + nPrimi);
+        System.out.println(Thread.currentThread().getName() + ": Nr. di numeri primi minori di " + n + " = " + nPrimi);
     }
 }
