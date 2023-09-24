@@ -10,7 +10,7 @@ public class Main {
         try {
             nThreads = Integer.parseInt(input);
         }catch (Exception e){
-            System.out.println("Inserire unxxx numero");
+            System.out.println("Inserire un numero");
         }
 
         ExecutorService executor = null;
