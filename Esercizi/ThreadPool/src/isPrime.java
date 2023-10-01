@@ -4,9 +4,9 @@ public class isPrime implements Runnable {
     public void run() {
         int nPrimi = 0;
         boolean flag;
-        for (int i = 1; i < n; i++){
+        for (int i = 2; i < n; i++){
             flag = true;
-            for (int j = 2; j <= Math.floor(Math.sqrt(i)); j++){
+            for (int j = 2; j <= Math.sqrt(i); j++){
                 if (i % j == 0){
                     flag = false;
                     break;
