@@ -1,17 +1,14 @@
-import java.io.*;
 import java.util.concurrent.*;
 
 public class Main {
-    public static void main(String[] args) throws IOException {
-        BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in));
-        System.out.print("Numero di thread: ");
-        String input = keyboard.readLine();
-        int nThreads = 0;
-        try {
-            nThreads = Integer.parseInt(input);
-        }catch (Exception e){
-            System.out.println("Inserire un numero");
+    public static void main(String[] args)  {
+
+        if (args.length != 2){
+            System.out.println("Numero di parametri sbagliato. \n 1° parametro: # di thread. \n 2° parametro: # di task.");
+            return;
         }
+        int nThreads = Integer.parseInt(args[0]);
+        int nTasks = Integer.parseInt(args[1]);
 
         ExecutorService executor = null;
         try {
@@ -20,17 +17,10 @@ public class Main {
             System.out.println(e.getMessage());
         }
 
-        System.out.print("Numero di task: ");
-        input = keyboard.readLine();
-        int nTasks = 0;
-        try {
-            nTasks = Integer.parseInt(input);
-        }catch (Exception e){
-            System.out.println("Inserire un numero");
-        }
-
         for (int i = 0; i < nTasks; i++){
             executor.submit(new isPrime());
         }
+
+        executor.shutdown();
     }
 }
