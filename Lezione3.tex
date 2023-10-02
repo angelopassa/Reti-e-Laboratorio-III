@@ -2,23 +2,23 @@
 \subsection{Perché e come stratificare}
 Nei sistemi di comunicazione non si utilizza un unico protocollo infatti, stratificare il problema permette di:
 \begin{itemize}
-    \item scompone il problema in sottoproblemi più semplici da trattare; il singolo strato è più semplice del sistema nel suo complesso.
+    \item scomporre il problema in sottoproblemi più semplici da trattare; il singolo strato è più semplice del sistema nel suo complesso.
     \item semplificare la progettazione, implementazione e manutenzione del software.
-    \item rendere i livelli indipendenti, è possibile modificare l’implementazione di uno strato senza dover cambiare gli altri, a patto che l’interfaccia non cambi.
+    \item rendere i livelli indipendenti: è possibile modificare l’implementazione di uno strato senza dover cambiare gli altri, a patto che l’interfaccia non cambi.
 \end{itemize}
 
 La separazione dei livelli non può ovviamente essere fatta in modo superficiale. Avere troppi livelli infatti rende il sistema poco scalabile, d'altro canto averne pochi rende i vari livelli complessi da realizzare. 
 \newline Il processo di stratificazione avviene seguendo due principi:
 \begin{itemize}
-    \item \textbf{\textcolor{purple}{Separation of Concern: }}Separazione degli interessi e delle responsabilità, fare ciò che compete, delegando ad altri tutto ciò che è delegabile.
-    \item \textbf{\textcolor{purple}{Information Hiding: }}Nascondere tutte le informazioni che non sono indispensabili per il committente per definire compiutamente l'operazione.
+    \item \textbf{\textcolor{purple}{Separation of Concern}}: separazione degli interessi e delle responsabilità, fare ciò che compete, delegando ad altri tutto ciò che è delegabile.
+    \item \textbf{\textcolor{purple}{Information Hiding}}: nascondere tutte le informazioni che non sono indispensabili per il committente per definire compiutamente l'operazione.
 \end{itemize}
-Per garantire questi due principi inoltre la comunicazione tra livelli adiacenti deve essere ridotta al minimo indispensabile e ogni strato deve svolgere uan sola e ben definita funzione.
+Per garantire questi due principi inoltre la comunicazione tra livelli adiacenti deve essere ridotta al minimo indispensabile e ogni strato deve svolgere una sola e ben definita funzione.
 
 \subsection{Open System Interconnection}
-\paragraph{Sistemi chiusi} Negli anni '60 nascono le prime reti di calcolatori come RPANET, SNA (IBM) e DNA (Digital) che utilizzano architetture di rete a strati. Ognuna di queste reti però utilizzava protocolli proprietari incapaci di operare in ambienti condivisi perché non in grado di interpretare i segnali provenienti dall'esterno.
+\paragraph{Sistemi chiusi} Negli anni '60 nascono le prime reti di calcolatori come ARPANET\footnote{\url{https://it.wikipedia.org/wiki/ARPANET}}, SNA (IBM)\footnote{\url{https://it.wikipedia.org/wiki/Systems_Network_Architecture}} e DNA (Digital) che utilizzano architetture di rete a strati. Ognuna di queste reti però utilizzava protocolli proprietari incapaci di operare in ambienti condivisi perché non in grado di interpretare i segnali provenienti dall'esterno.
 
-\paragraph{Sistemi aperti} L'obiettivo principale di questa tipologia di sistemi e quello di realizzare una rete di calcolatori in cui qualsiasi terminale comunica con un qualsiasi fornitore di servizi mediante qualsiasi rete. \newline Per poter rendere possibile questo obiettivo è necessario stabilire delle regole comuni, degli \textcolor{purple}{standard}.
+\paragraph{Sistemi aperti} L'obiettivo principale di questa tipologia di sistemi e quello di realizzare una rete di calcolatori in cui qualsiasi terminale comunica con un qualunque fornitore di servizi mediante una rete. \newline Per poter rendere possibile questo obiettivo è necessario stabilire delle regole comuni, degli \textcolor{purple}{standard}.
 
 \begin{definition}
     Un protocollo è detto \textbf{\textcolor{purple}{Aperto}} se:
@@ -53,9 +53,9 @@ L’International Organization for Standards (ISO) ha specificato uno standard p
 
 \paragraph{Cosa deve fare un protocollo} In un protocollo vanno specificati:
 \begin{itemize}
-    \item La sintassi del messaggio; che campi contiene e in quale formato.
-    \item La semantica del messaggio; come interpretare i vari campi e il messaggio stesso.
-    \item Le azioni da intraprendere dopo la ricezione di un messaggio
+    \item La sintassi del messaggio: che campi contiene e in quale formato.
+    \item La semantica del messaggio: come interpretare i vari campi e il messaggio stesso.
+    \item Le azioni da intraprendere dopo la ricezione di un messaggio.
 \end{itemize}
 
 \newpage
@@ -85,12 +85,12 @@ L’International Organization for Standards (ISO) ha specificato uno standard p
     \item \textbf{\textcolor{purple}{Livello di Trasporto:}}    
         \begin{itemize}
             \item Questo strato fornisce un servizio di trasferimento dati end-to-end.
-            \item Si occupa di instaurare, mantenere terminare una connessione.
+            \item Si occupa di instaurare, mantenere e terminare una connessione.
             \item Può offrire funzionalità per frammentare e riassemblare i dati, rilevare e correggere gli errori, controllare il flusso dei dati.
         \end{itemize}
-    \item \textbf{\textcolor{purple}{Livello di Sessione:}} Assembla il dialogo tra nodi in unità logiche.
-    \item \textbf{\textcolor{purple}{Livello di Presentazione:}} Adatta la sintassi dei dati di ciascuna applicazione alla sintassi richiesta dalla sessione.
-    \item \textbf{\textcolor{purple}{Livello di Applicazione:}} Protocolli a supporto di applicazioni distribuite.
+    \item \textbf{\textcolor{purple}{Livello di Sessione:}} assembla il dialogo tra nodi in unità logiche.
+    \item \textbf{\textcolor{purple}{Livello di Presentazione:}} adatta la sintassi dei dati di ciascuna applicazione alla sintassi richiesta dalla sessione.
+    \item \textbf{\textcolor{purple}{Livello di Applicazione:}} protocolli a supporto di applicazioni distribuite.
 \end{itemize}
 
 \begin{figure}[h]
@@ -137,10 +137,10 @@ Ogni livello aggiunge all’informazione del livello superiore una propria sezio
 TCP/IP è una famiglia di protocolli attualmente utilizzata in Internet. Si tratta di una gerarchia di protocolli, ciascuno dei quali fornisce funzionalità specifiche.
 \newline Definita in origine in termini di quattro livelli software soprastanti a un livello hardware, la pila TCP/IP è oggi intesa come composta di cinque livelli.
 \begin{itemize}
-    \item \textbf{\textcolor{purple}{Applicazione:}} supporta le applicazioni di rete, collegamento logico end-to-end; scambio di messaggi tra due processi. (ftp, smtp, http).
-    \item \textbf{\textcolor{purple}{Trasporto:}} trasferimento dati end-to-end da un host sorgente all’host destinatario (tcp,udp)
-    \item \textbf{\textcolor{purple}{Rete:}} instradamento dei datagrammi dalla sorgente alla destinazione (Ip,ICMP).
-    \item \textbf{\textcolor{purple}{Link:}} trasferimento dati in frame attraverso il collegamento tra elementi di rete vicini (ppp,ethernet,...)
+    \item \textbf{\textcolor{purple}{Applicazione:}} supporta le applicazioni di rete, collegamento logico end-to-end; scambio di messaggi tra due processi (ftp, smtp, http).
+    \item \textbf{\textcolor{purple}{Trasporto:}} trasferimento dati end-to-end da un host sorgente all’host destinatario (tcp, udp).
+    \item \textbf{\textcolor{purple}{Rete:}} instradamento dei datagrammi dalla sorgente alla destinazione (Ip, ICMP).
+    \item \textbf{\textcolor{purple}{Link:}} trasferimento dati in frame attraverso il collegamento tra elementi di rete vicini (p2p, ethernet, ...).
     \item \textbf{\textcolor{purple}{Fisico:}} trasferimenti dei bit di un frame sul mezzo trasmissivo.
 \end{itemize}
 
