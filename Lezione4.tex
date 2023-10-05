@@ -61,11 +61,11 @@ Esistono due principali tipologie di URI:
     $<$scheme$>$://$<$user$>$:$<$password$>$@$<$host$>$:$<$port$>$/$<$path$>$
 \end{center}
 \begin{itemize}
-    \item $<$user$>$ e $<$password$>$ opzionale, in generale deprecato;
-    \item $<$scheme$>$ indica il protocollo di accesso alla risorsa;
-    \item $<$host$>$ nome di dominio di un host o indirizzo ip (in notazione decimale puntata);
-    \item $<$port$>$ numero di porta del server;
-    \item $<$path$>$ contiene dati specifici per l’host (o scheme) e identifica la risorsa nel contesto di quello schema e host.
+    \item \textcolor{blue}{$<$user$>$} e \textcolor{blue}{$<$password$>$} opzionale, in generale deprecato;
+    \item \textcolor{blue}{$<$scheme$>$} indica il protocollo di accesso alla risorsa;
+    \item \textcolor{blue}{$<$host$>$} nome di dominio di un host o indirizzo ip (in notazione decimale puntata);
+    \item \textcolor{blue}{$<$port$>$} numero di porta del server;
+    \item \textcolor{blue}{$<$path$>$} contiene dati specifici per l’host (o scheme) e identifica la risorsa nel contesto di quello schema e host.
 \end{itemize}
 A loro volta le URL possono essere di due tipologie differenti:
 \begin{itemize}
@@ -104,4 +104,136 @@ Per funzionare utilizza il protocollo di trasporto TCP con il quale viene instau
     \caption{Esempio di interazione con protocollo HTTP (\textcolor{red}{2})}
 \end{figure}
 
-In caso di connessione persistente, questa non può essere utilizzata per una serie di richieste ed una corrispondente serie di risposte. Il server infatti dopo aver inviato la sua risposta rimane in attesa di altre richieste sulla connessione già aperta, fino ad una richiesta di chiusura da parte del client (che lo specifica nell'header) o in caso di attesa prolungata (time out).
+\newpage
+
+L'utilizzo di una connessione persistente non permette di base ad un client di inviare una serie di richieste per ricevere una corrispondente serie di risposte; l'instaurazione di una connessione persistente ha lo scopo principale di migliorare le prestazioni della comunicazione.
+\paragraph{Pipelining}Il \textcolor{purple}{Pipelining} è una tecnica di trasmissione delle richieste che consiste nell’invio da parte del client di molteplici richieste senza
+aspettare la ricezione di ciascuna risposta. Il server deve inviare le risposte nello stesso ordine in cui sono state ricevute le richieste.
+\newline I server web che rispettano HTTP/1.1 devono supportare il pipelining, ma allo stesso tempo pochi browser web supportano questa tecnica. Questo accade perché se una richiesta necessita tempo per essere processata, le risposte alle richieste successive sono bloccate (\textcolor{purple}{Head of Line Blocking}) e in questi casi lo scopo principale di migliorare le prestazioni viene a mancare.
+
+\subsubsection{Formato messaggi HTTP}
+Come detto i messaggi HTTP possono essere di tipo richiesta o risposta, la struttura del messaggio è però la medesima:
+\begin{itemize}
+    \item \textcolor{purple}{Start line}
+    \item \textcolor{purple}{Header}
+    \item \textcolor{purple}{Body}
+\end{itemize}
+
+\paragraph{HTTP request line} Nella start line denominata \textcolor{purple}{Request-Line} per i messaggi di richiesta sono presenti tre campi:
+\begin{itemize}
+    \item \textcolor{blue}{Method:} operazione che il client richiede al server venga effettuata. I metodi più comuni sono GET, POST, PUT e DELETE;
+    \item \textcolor{blue}{Request-URI:} risorsa sulla quale il client vuole venga eseguita l'operazione;
+    \item \textcolor{blue}{HTTP-Version:} il mittente indica il formato del messaggio e la sua capacità di comprendere ulteriori comunicazioni HTTP. 
+\end{itemize}
+
+\paragraph{HTTP status line} Nella start line denominata \textcolor{purple}{Status-Line} per i messaggi di risposta sono presenti tre campi:
+\begin{itemize}
+    \item \textcolor{blue}{HTTP-Version}
+    \item \textcolor{blue}{Status-Code:} intero a tre cifre che sta ad indicare l'esito della rispostsa (sono definiti dal protocollo).
+    \item \textcolor{blue}{Reason-Phrase:} descrizione testuale dello status code (pensata per l’utente umano). 
+\end{itemize}
+
+\paragraph{Header}
+Gli header sono coppie (nome: valore) che specificano alcuni parametri del messaggio trasmesso o ricevuto. Esistono vari tipi di header:
+\begin{itemize}
+    \item \textcolor{blue}{General Header:} relativi alla connessione (data, codifica, connessione,...);
+    \item \textcolor{blue}{Entity Header:} relativi all’entità trasmessa (content-type, content-length, data di scadenza,...);
+    \item \textcolor{blue}{RequestHeader:} relativi al messaggio di richiesta;
+    \item \textcolor{blue}{Response Header:} relativi al messaggio di risposta;
+\end{itemize}
+\newblock
+\begin{mdframed}
+    GET http://192.168.11.66/ HTTP/1.1\newline
+    host: 192.168.11.66\newline
+    Connection: close\newline
+    \\
+    HTTP/1.1 200 OK\newline
+    Date: Sun, 14 May 2000 23:49:39 GMT\newline
+    Server: Apache/1.3.9 (Unix) (Red Hat/Linux)\newline
+    Last-Modified: Tue, 21 Sep 1999 14:46:36 GMT\newline
+    ETag: "f2fc-799-37e79a4c"\newline
+    Accept-Ranges: bytes\newline
+    Content-Length: 1945\newline
+    Connection: close\newline
+    Content-Type: text/html\newline
+    \\
+    $<$!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN"$>$\newline
+    $<$HTML$>$\newline
+    $<$HEAD$>$$<$TITLE$>$Test Page for Red Hat Linux's Apache Installation$<$/TITLE$>$$<$/HEAD$>$\newline
+    $<$H1 ALIGN="CENTER"$>$It Worked!$<$/H1$>$\newline
+    $<$P$>$\newline
+    If you can see this, it means that the installation of the $<$AHREF="http://www.apache.org/"$>$Apache$<$/A$>$ software on this $<$ahref="http://www.redhat.com/"$>$Red Hat Linux$<$/a$>$ system was successful. You may now add content to this directory and replace this page.\newline
+    $<$/P$>$\newline
+    $<$/BODY$>$\newline
+    $<$/HTML$>$\newline    
+\end{mdframed}
+
+\newpage
+\paragraph{Content Negotation}
+Le risorse che un client richiede possono essere disponibili in più rappresentazioni (lingua, formato di dati, dimensione, ecc..). La \textcolor{purple}{Content-Negotiation} è un meccanismo per selezionare la rappresentazione appropriata quando viene servita una richiesta (uso di Request e Entity headers).
+
+\subsubsection{Metodi}
+\paragraph{OPTIONS} Permette di richiedere al server di fornire le opzioni di comunicazione associate ad un URL o al server stesso (le sue capacità, metodi esposti,...).
+\begin{mdframed}
+    \textcolor{blue}{OPTIONS http://192.168.11.66/manual/index.html}\newline
+    HTTP/1.1\newline
+    host: 192.168.11.66\newline
+    Connection: close\newline
+    \\
+    HTTP/1.1 200 OK\newline
+    Date: Sun, 14 May 2000 19:52:12 GMT\newline
+    Server: Apache/1.3.9 (Unix) (Red Hat/Linux)\newline
+    Content-Length: 0\newline
+    Allow: GET, HEAD, OPTIONS, TRACE\newline
+    Connection: close
+\end{mdframed}
+
+\paragraph{GET} Permette di richiedere il trasferimento di una risorsa identificata da una URL o operazioni associate all’URL stessa.
+\begin{mdframed}
+    \textcolor{blue}{GET http://192.168.11.66 HTTP/1.1}\newline
+    host: 192.168.11.66\newline
+    Connection: close\newline
+    \\
+    \textcolor{blue}{HTTP/1.1 200 OK}\newline
+    Date: Sun, 14 May 2000 19:57:13 GMT\newline
+    Server: Apache/1.3.9 (Unix) (Red Hat/Linux)\newline
+    \textcolor{blue}{Last-Modified: Tue, 21 Sep 1999 14:46:36 GMT}\newline
+    ETag: "f2fc-799-37e79a4c"\newline
+    Accept-Ranges: bytes\newline
+    Content-Length: 1945\newline
+    Connection: close\newline
+    Content-Type: text/html\newline
+    $<$!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN"$>$\newline
+    $<$HTML$>$ ...
+\end{mdframed}
+
+\newpage
+Una variante del GET detta GET-Condizionale permette di modificare la risposta del server in base agli header utilizzati (Non modifica il numero totale di messaggi HTTP inviati).
+\begin{mdframed}
+    \textcolor{blue}{GET http://192.168.11.66 HTTP/1.1}\newline
+    Host: 192.168.11.66\newline
+    \textcolor{blue}{If-Modified-Since: Tue, 21 Sep 1999 14:46:36 GMT}\newline
+    \\
+    \textcolor{blue}{HTTP/1.1 304 Not Modified}\newline
+    Date: Wed, 22 Sep 1999 15:06:36 GMT\newline
+    Server: Apache/1.3.9 (Unix) (Red Hat/Linux)\newline
+\end{mdframed}
+
+\paragraph{HEAD}
+Simile al GET, ma il server non trasferisce il message body nella risposta.
+Utile per controllare lo stato dei documenti (validità, modifiche, cache refresh).
+
+\paragraph{POST} Permette al client di inviare informazioni al server, le quali vengono inserite nel body.\newline
+\\
+Lo standard afferma che:\newline
+\emph{Il metodo POST è usato per chiedere che il server accetti l’entità (risorsa)
+nel corpo della richiesta come una nuova subordinata della risorsa
+identificata dalla Request-URI nella Request-Line.}
+\\
+\newline
+Nella pratica la funzione effettivamente eseguita dal metodo POST è determinata dal server e dipendente tipicamente dalla Request-URI.
+\newline
+NB: con le API REST vengono rispettate le specifiche HTTP.
+
+\paragraph{DELETE} Permette al client di chiedere al server di cancellare una risorsa identificata dalla Request URI
+\newline NB: I metodi PUT e DELETE sono normalmente non abilitati sui server web pubblici.
