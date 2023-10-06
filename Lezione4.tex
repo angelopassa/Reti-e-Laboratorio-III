@@ -204,8 +204,8 @@ Le risorse che un client richiede possono essere disponibili in più rappresenta
     $<$HTML$>$ ...
 \end{mdframed}
 
+\paragraph{Conditional GET} Una variante del GET detta GET-Condizionale permette di modificare la risposta del server in base agli header utilizzati (Non modifica il numero totale di messaggi HTTP inviati).
 \newpage
-Una variante del GET detta GET-Condizionale permette di modificare la risposta del server in base agli header utilizzati (Non modifica il numero totale di messaggi HTTP inviati).
 \begin{mdframed}
     \textcolor{blue}{GET http://192.168.11.66 HTTP/1.1}\newline
     Host: 192.168.11.66\newline
@@ -237,7 +237,6 @@ NB: con le API REST vengono rispettate le specifiche HTTP.
 \paragraph{DELETE} Permette al client di chiedere al server di cancellare una risorsa identificata dalla Request URI.
 \\ \\ NB: I metodi PUT e DELETE sono normalmente non abilitati sui server web pubblici.
 
-\newpage
 \paragraph{Metodi sicuri} Con \textcolor{purple}{metodi sicuri} si fa riferimento a quei metodi che non hanno "effetti collaterali" (per esempio modificare una risorsa). Questi sono: GET, HEAD, OPTIONS e TRACE.
 
 \paragraph{Metodi idempotenti} Con \textcolor{purple}{metodi idempotenti} si fa riferimento a qeui metodi che presentano la proprietà per la quale n$>$0 richieste identiche tra loro hanno lo stesso effetto di una singola richiesta. Questi metodi sono: GET, HEAD, PUT, DELETE, OPTIONS, TRACE.
@@ -256,7 +255,7 @@ La prima volta che un client invia un messaggio HTTP ad un server, questo lo "ob
 
 \begin{figure}[h]
     \centering
-    \includegraphics[scale=0.27]{Immagini/Cookie.png}
+    \includegraphics[scale=0.25]{Immagini/Cookie.png}
     \caption{Esempio di interazione con protocollo HTTP e utilizzo di cookie}
 \end{figure}
 \newpage
@@ -294,3 +293,4 @@ I byte con il bit più significativo a 1 vengono usati per le sequenze di comand
 \\ \\ I messaggi di controllo iniziali sono usati per scambiare informazioni sulle caratteristiche degli host (\textcolor{purple}{Telnet option negotiation}).
 
 \paragraph{Sicurezza} Telnet non è un protocollo sicuro inquanto tutte le comunicazioni tra macchina locale e remota avvengono in chiaro.
+\newpage
