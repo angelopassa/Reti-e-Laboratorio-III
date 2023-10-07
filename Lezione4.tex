@@ -1,3 +1,4 @@
+\newpage
 \section{Lo strato Applicativo}
 \paragraph{Applicazioni} 
 Le applicazioni di rete sono formate da processi distributi, su vari host. Ogni host può eseguire uno o più processi contemporaneamente. Questi processi comunicano tra loro mediante lo scambio di \textcolor{purple}{messaggi}.
@@ -95,13 +96,9 @@ Per funzionare utilizza il protocollo di trasporto TCP con il quale viene instau
 
 \begin{figure}[h]
     \centering
-    \includegraphics[scale=0.30]{Immagini/Esempio_richiesta_HTTP.png}
-    \caption{Esempio di interazione con protocollo HTTP (\textcolor{red}{1})}
-\end{figure}
-\begin{figure}[h]
-    \centering
+    \includegraphics[scale=0.28]{Immagini/Esempio_richiesta_HTTP.png}
     \includegraphics[scale=0.30]{Immagini/Esempio_richiesta_HTTP_2.png}
-    \caption{Esempio di interazione con protocollo HTTP (\textcolor{red}{2})}
+    \caption{Esempio di interazione con protocollo HTTP.}
 \end{figure}
 
 \newpage
@@ -141,7 +138,6 @@ Gli header sono coppie (nome: valore) che specificano alcuni parametri del messa
     \item \textcolor{blue}{RequestHeader:} relativi al messaggio di richiesta;
     \item \textcolor{blue}{Response Header:} relativi al messaggio di risposta;
 \end{itemize}
-\newblock
 \begin{mdframed}
     GET http://192.168.11.66/ HTTP/1.1\newline
     host: 192.168.11.66\newline
@@ -168,9 +164,10 @@ Gli header sono coppie (nome: valore) che specificano alcuni parametri del messa
     $<$/HTML$>$\newline    
 \end{mdframed}
 
-\newpage
 \paragraph{Content Negotation}
 Le risorse che un client richiede possono essere disponibili in più rappresentazioni (lingua, formato di dati, dimensione, ecc..). La \textcolor{purple}{Content-Negotiation} è un meccanismo per selezionare la rappresentazione appropriata quando viene servita una richiesta (uso di Request e Entity headers).
+
+\newpage
 
 \subsubsection{Metodi}
 \paragraph{OPTIONS} Permette di richiedere al server di fornire le opzioni di comunicazione associate ad un URL o al server stesso (le sue capacità, metodi esposti,...).
@@ -207,8 +204,8 @@ Le risorse che un client richiede possono essere disponibili in più rappresenta
     $<$HTML$>$ ...
 \end{mdframed}
 
+\paragraph{Conditional GET} Una variante del GET detta GET-Condizionale permette di modificare la risposta del server in base agli header utilizzati (Non modifica il numero totale di messaggi HTTP inviati).
 \newpage
-Una variante del GET detta GET-Condizionale permette di modificare la risposta del server in base agli header utilizzati (Non modifica il numero totale di messaggi HTTP inviati).
 \begin{mdframed}
     \textcolor{blue}{GET http://192.168.11.66 HTTP/1.1}\newline
     Host: 192.168.11.66\newline
@@ -235,5 +232,65 @@ Nella pratica la funzione effettivamente eseguita dal metodo POST è determinata
 \newline
 NB: con le API REST vengono rispettate le specifiche HTTP.
 
-\paragraph{DELETE} Permette al client di chiedere al server di cancellare una risorsa identificata dalla Request URI
-\newline NB: I metodi PUT e DELETE sono normalmente non abilitati sui server web pubblici.
+\paragraph{PUT} Permette al client di chiedere al server di creare o modificare (se già esistente) una risorsa specificata nell'URI.
+
+\paragraph{DELETE} Permette al client di chiedere al server di cancellare una risorsa identificata dalla Request URI.
+\\ \\ NB: I metodi PUT e DELETE sono normalmente non abilitati sui server web pubblici.
+
+\paragraph{Metodi sicuri} Con \textcolor{purple}{metodi sicuri} si fa riferimento a quei metodi che non hanno "effetti collaterali" (per esempio modificare una risorsa). Questi sono: GET, HEAD, OPTIONS e TRACE.
+
+\paragraph{Metodi idempotenti} Con \textcolor{purple}{metodi idempotenti} si fa riferimento a qeui metodi che presentano la proprietà per la quale n$>$0 richieste identiche tra loro hanno lo stesso effetto di una singola richiesta. Questi metodi sono: GET, HEAD, PUT, DELETE, OPTIONS, TRACE.
+
+\subsubsection{Caching e Cookie}
+\paragraph{Web Caching} Tecnica che ha lo scopo principale di soddisfare richieste del client senza contattare i server. Consiste nel memorizzare copie temporanee di risorse Web e servirle al client per ridurre l’uso di risorse e diminuire tempo di risposta. I due principali approcci sono:
+\begin{itemize}
+    \item \textcolor{purple}{User Agent Cache:} il browser mantiene una copia delle risorse visitate dall'utente per quando queste verranno nuovamente visitate.
+    \item \textcolor{purple}{Proxy Cache:} server proxy dedicati si intrappongono tra il client e il server. Quando un client esegue una richiesta questa passa per il server proxy e se è già stata memorizzata viene restituita al client; altrimenti il proxy si preoccupa di inoltrare la richiesta al server di competenza e una volta ricevuta la risposta la memorizza e la inoltra al client.
+\end{itemize}
+
+\paragraph{Cookie} I \textcolor{purple}{Cookie} sono un meccanismo con il quale è possibile memorizzare delle informazioni su un certo client.
+Come detto HTTP è un protocollo state-less perciò un server non ha modo di tenere traccia dei client (anche perché questi di norma non hanno un ip statico).
+La prima volta che un client invia un messaggio HTTP ad un server, questo lo "obbliga" a memorizzare un'insieme di informazioni che verranno utilizzate nelle successive comunicazioni.
+\newline Gli utilizzi principali dei cookie sono: autenticazione, memorizzazione dati form e in generale creare sessioni su un protocollo state-less.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.25]{Immagini/Cookie.png}
+    \caption{Esempio di interazione con protocollo HTTP e utilizzo di cookie}
+\end{figure}
+\newpage
+\subsection{TELNET} Il protocollo \textcolor{purple}{TErminL NETwork} ha lo scopo principale di permettere l'uso interattivo di macchine remote. Funzionamento:
+\begin{enumerate}
+    \item la macchina locale stabilisce una connessione con un server login remoto;
+    \item tutte le battute dei tasti della macchina locale vengono inviati alla macchina remota, la quale esegue i comandi come se fossero stati battuti sulla macchina stessa.
+    \item l'output viene inoltrato dalla macchina remota alla macchina locale;
+\end{enumerate}
+Per poter garantire questo funzionamento il modello di telnet include:
+\begin{itemize}
+    \item Un \textcolor{blue}{programma server} che accetta le richieste;
+    \item Un \textcolor{blue}{programma client} che effettua le richieste e interagisce direttamente con l'utente;
+\end{itemize}
+La connessione viene realizzata mediante il protocollo TCP sulla porta 23.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.27]{Immagini/Schema_Telnet.png}
+    \caption{Esempio di interazione con protocollo TELNET}
+\end{figure}
+
+\newblock
+
+\paragraph{NVT} Telnet deve poter operare con il numero massimo di sistemi e quindi gestire dettagli di sistemi operativi eterogenei (i quali possono differire per numerosi aspetti).
+Per risolvere il problema client e server devono eseguire un \textcolor{purple}{Network Virtual Terminal} il quale effettua la codifica dei caratteri del sistema locale nel set di caratteri e comandi specifici della NVT.
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.27]{Immagini/Telnet_NVT.png}
+    \caption{Esempio di interazione con protocollo TELNET e NVT}
+\end{figure}
+
+Gli NVT si scambiano dati in formato 7-bit US-ASCII. Ogni carattere è inviato come un ottetto con il primo bit settato a zero.
+I byte con il bit più significativo a 1 vengono usati per le sequenze di comandi e vengono preceduti da un ottetto speciale detto IAC (Interpret as Command).
+\\ \\ I messaggi di controllo iniziali sono usati per scambiare informazioni sulle caratteristiche degli host (\textcolor{purple}{Telnet option negotiation}).
+
+\paragraph{Sicurezza} Telnet non è un protocollo sicuro inquanto tutte le comunicazioni tra macchina locale e remota avvengono in chiaro.
+\newpage
