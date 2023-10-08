@@ -12,7 +12,7 @@ public class Persona implements Runnable{
     public void run() {
         System.out.println(Thread.currentThread().getName() + ": Persona nr." + this.numero + " viene servita allo sportello");
         try {
-            Thread.sleep((int)(Math.random() * 10000) + 3000);
+            Thread.sleep((int)(Math.random() * 10001) + 3000);
             //ogni persona si ferma allo sportello per un intervallo di tempo di 3-13 secondi
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
