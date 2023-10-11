@@ -259,10 +259,10 @@ La prima volta che un client invia un messaggio HTTP ad un server, questo lo "ob
     \caption{Esempio di interazione con protocollo HTTP e utilizzo di cookie}
 \end{figure}
 \newpage
-\subsection{TELNET} Il protocollo \textcolor{purple}{TErminL NETwork} ha lo scopo principale di permettere l'uso interattivo di macchine remote. Funzionamento:
+\subsection{TELNET} Il protocollo \textbf{\textcolor{purple}{TErminL NETwork}} ha lo scopo principale di permettere l'uso interattivo di macchine remote. Funzionamento:
 \begin{enumerate}
     \item la macchina locale stabilisce una connessione con un server login remoto;
-    \item tutte le battute dei tasti della macchina locale vengono inviati alla macchina remota, la quale esegue i comandi come se fossero stati battuti sulla macchina stessa.
+    \item tutte le battute dei tasti della macchina locale vengono inviate alla macchina remota, la quale esegue i comandi come se fossero stati battuti sulla macchina stessa.
     \item l'output viene inoltrato dalla macchina remota alla macchina locale;
 \end{enumerate}
 Per poter garantire questo funzionamento il modello di telnet include:
@@ -293,4 +293,165 @@ I byte con il bit più significativo a 1 vengono usati per le sequenze di comand
 \\ \\ I messaggi di controllo iniziali sono usati per scambiare informazioni sulle caratteristiche degli host (\textcolor{purple}{Telnet option negotiation}).
 
 \paragraph{Sicurezza} Telnet non è un protocollo sicuro inquanto tutte le comunicazioni tra macchina locale e remota avvengono in chiaro.
+
+\subsection{Email}
+\paragraph*{Posta Elettronica} La posta elettronica è uno dei primi servizi applicativi di internet che consiste nel trasferimento di un messaggio tra uno user mittente ed uno user destinatario.
+Il servizio di posta elettronica si basa su componenti intermedi per trasferire i messaggi (disaccoppiando mittente e destinatario) per risolvere il problema di disponibilità del destinatario:
+\begin{itemize}
+    \item computer spento;
+    \item utente impegnato.
+\end{itemize}
+I componenti sono:
+\begin{itemize}
+    \item \textcolor{purple}{User Agent}, per la composizione, editing, lettura di messaggi di posta (Outlook, Eudora,...);
+    \item \textcolor{purple}{Mail Server}, il quale presenta:
+        \begin{itemize}
+            \item \textcolor{blue}{Mail Box}, dove sono archiviati messaggi in ingresso che devono ancora essere letti dall'utente;
+            \item una coda dei messaggi in uscita che devono essere ancora inviati.
+        \end{itemize}
+    \item \textcolor{purple}{protocollo SMTP}, che permette il dialogo tra i Mail Server:
+        \begin{itemize}
+            \item \textcolor{blue}{client}, mail server che invia i messaggi;
+            \item \textcolor{blue}{server}, mail server che riceve i messaggi.
+        \end{itemize}
+\end{itemize}
+
+\paragraph{Indirizzo Mail}
+Un destinatario è identificato da un indirizzo email nella forma:
+\begin{center}
+    local-part @ domain-name
+\end{center}
+\begin{itemize}
+    \item \textcolor{blue}{domain-name}, specifica un mail server. Determina il nome di dominio di una destinazione a cui la mail dovrebbe essere recapitata.
+    \item \textcolor{blue}{local-part}, pecifica la cassetta di posta nel mail server. Spesso è identica al nome di login o al nome completo dell’utente.
+\end{itemize}
+
+\paragraph{Spooling} I server si posta elettronica addottano un tecnica denominata \textcolor{purple}{spooling}:
+\begin{enumerate}
+    \item L'utente invia un messaggio e il server ne pone una copia in un'area di memoria denominata \textcolor{blue}{spool} (o anche area di accodamento della posta) insieme a:
+        \begin{itemize}
+            \item id mittente;
+            \item id destinatario;
+            \item id macchina destinazione;
+            \item tempo di deposito.
+        \end{itemize}
+    \item Il sistema (\textcolor{blue}{client}) avvia il trasferimento alla macchina remota stabilendo con essa una connessione TCP:
+        \begin{itemize}
+            \item se la connessione viene aperta e il trasferimento va a buon fine allora il client cancella la copia locale della mail;
+            \item altrimenti, il client scandisce periodicamente l'area di spool e tenta il trasferimento dei messaggi non consegnati. Oltre un certo intervallo di tempo (definito dall’amministratore del server) se il messaggio non è stato consegnato, viene inviata una notifica all’utente mittente.
+        \end{itemize}
+\end{enumerate}
+
+\paragraph{Alias}
+\begin{definition}
+    Un \textcolor{purple}{alias} è una cassetta postale virtuale che serve a ridistribuire i messaggi verso uno o più indirizzi di posta elettronica personali.
+\end{definition}
+
+Esistono due tipologie di alias:
+\begin{itemize}
+    \item \textcolor{purple}{molti-uno:} il sistema di alias permette ad un singolo utente di avere identificatori di mail multipli, assegnando un set di identificatori ad una singola persona;
+    \item \textcolor{purple}{uno-molti:} il sistema permette di associare un gruppo di destinatari ad un singolo identificatore.
+\end{itemize}
+
+\subsubsection{SMTP}
+\textbf{\textcolor{purple}{Simple Mail Transfer Protocol}} ha come obiettivo principale il trasferimento affidabile ed efficiente di mail.
+Le principali caratteristiche sono:
+\begin{itemize}
+    \item indipendenza dal sistema di trasmissione usato, SMTP richiede solo il trasferimento di stream di byte ordinato e affidabile.
+    \item la capacità di trasportare mail attraverso più reti. Un messaggio di mail può passare attraverso server intermedi nel percorso da mittente a destinatario finale.
+\end{itemize}
+SMTP è detto protocollo di tipo \textcolor{purple}{push}.
+
+\paragraph{Modello di SMTP}
+Quando un client SMTP vuole trasferire un messaggio, stabilisce un canale di trasmissione bidirezionale con un server SMTP. 
+La responsabilità di un client è di trasferire la mail a un server SMTP, o comunicare un eventuale insuccesso (scambio formale di responsabilità).
+Un client SMTP determina l’indirizzo di un host appropriato che ospita un server SMTP risolvendo il nome della destinazione in un indirizzo del mail server destinazione.
+\\Possibile problemi possono essere:
+\begin{itemize}
+    \item connessione con mailserver del mittente (server inesistente o irraggiungibile);
+    \item connessione con mailserver destinatario (server inesistente o irraggiungibile);
+    \item inserimento in mailbox destinatario (user unknown, mailbox full).
+\end{itemize}
+In \underline{tutti} questi casi il mittente riceve una notficata.
+
+\paragraph{Protocollo}
+Il trasferimento via SMTP avviene in tre fasi:
+\begin{enumerate}
+    \item \textcolor{purple}{Handshaking:} Una volta stabilita la connessione TCP il clinet attende che il server invii \textbf{220 READY FOR MAIL}. A questo punto il client invia il comando \textbf{HELO} e il server risponde identificandosi;
+    \item \textcolor{purple}{Trasferimento del messaggio:} Inizia la trasmissione del messaggio, il quale è suddiviso in:
+        \begin{itemize}
+            \item \textcolor{blue}{Header:} che contiene informazioni sul mittente, destinatario e oggetto del messaggio;
+            \item \textcolor{blue}{Body:} il contenuto del messaggio vero e proprio, codificato in 7-bit US-ASCII
+        \end{itemize}
+    \item \textcolor{purple}{Chiusura della connessione.}
+\end{enumerate}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.30]{Immagini/Comunicazione_SMTP.png}
+    \caption{Esempio di interazione con protocollo SMTP}
+\end{figure}
+
+\newblock
+La fine di un messaggio in SMTP è identificata dalla stringa \textbf{$<$CRLF$>$.$<$CRLF$>$} (un punto).
 \newpage
+\subsubsection{Estensioni multimediali} 
+La codifica 7-bit US-ASCII è molto restrittiva, infatti non supporta: accenti, lingue non latine, lingue senza alfabeti e contenuti multimediali come audio o video.
+\\Per risolvere questo probelma senza dover in alcun modo apportare modifiche ai Mail Server già esistenti, si è deciso di definire regole di codifica (\textcolor{purple}{encoding}) per il trasferimento di testo non ASCII. (Necessario invece aggiornare o cambiare User Agent)
+
+\paragraph{MIME}
+\textcolor{purple}{Multipurpose Internet Mail Extension} è uno standard di Internet che permette di estendere il formato di e-mail per suppportare:
+\begin{itemize}
+    \item esto in set di caratteri diversi da US-ASCII;
+    \item allegati in formato non testuale;
+    \item corpo del messaggio con più parti;
+    \item header in set di caratteri non-ASCII.
+\end{itemize}
+MIME definisce un insieme di metodi per rappresentare dati binari in formato ASCII.
+\\MIME fornisce vari schemi di transfer encoding, tra cui:
+\begin{itemize}
+    \item \textcolor{purple}{Base64 Encoding:} gruppi di 24 bit sono divisi in 4 unità da 6 bit e ciascuna unità viene inviata come un carattere ASCII;
+    \item \textcolor{purple}{Quoted-printable encoding:} per messaggi testuali con pochi caratteri non-ASCII, più efficiente.
+\end{itemize}
+
+L'utlizzo di questo standard per messaggi inviati con SMTP richiede l'utilizzo di ulteriori righe di intestazione per specificare: la versione MIME, il tipo di contenuto, ...
+
+\subsubsection{Accesso alla posta}
+Abbiamo visto come SMTP sia un protocollo di tipo push con il quale è possibile inviare un messaggio di posta elettronica fino al Mail server di destinazione. 
+Per recuperare il messaggio però abbiamo bisogno di un protocollo di tipo \textcolor{purple}{pull}, come per esempio:
+\begin{itemize}
+    \item \textbf{\textcolor{purple}{POP3}}
+    \item \textbf{\textcolor{purple}{IMAP}}
+    \item \textbf{\textcolor{purple}{HTTP:}} Hotmail , Yahoo! Mail, Gmail, ...
+\end{itemize}
+
+\paragraph{POP3} Lo User Agent del destinatario apre una connessione TCP, sulla porta 110, con il Mail Server e iniziano così le tre fasi per il recupro dei messaggi:
+\begin{itemize}
+    \item \textcolor{purple}{Autorizzazione:} Il client esegue l'accesso specificando username e password;
+    \item \textcolor{purple}{Scambio:} Il client con una serie di comandi visualizza i messaggi (\textcolor{blue}{list}), li preleva (\textcolor{blue}{retr}), marca i messaggi da eliminare sul server (\textcolor{blue}{dele}) e chiude la sessione (\textcolor{blue}{quit});
+    \item \textcolor{purple}{Aggiornamento: } Il server, dopo aver ricevuto il comado quit, cancella i messaggi marcati per la rimozione.
+\end{itemize}
+
+NB: POP3 non mantiene informazioni di stato tra sessioni
+
+\paragraph{IMAP}
+IMAP è un altro protocollo di tipo pull per il recupero di messaggi dai Mail server. 
+Presenta più feature di POP3 (per questo è anche più complesso) come la manipolazione dei messaggi memorizzati sul server e comandi per estrarre solo alcune componenti dei messaggi.
+
+% da finire quando lo farà a lezione
+% \subsection{FTP}
+% Il protocollo \textbf{\textcolor{purple}{File Transer Protocol}} è il protocollo standard per il trasferimento file in reti TCP/IP. Offre inoltre altre funzionalità, oltre al semplice trasferimento file, come l'accesso interattivo all'albero delle directory del FileSystem remoto e un accesso con autenticazione.
+
+% \paragraph{Modello FTP} FTP mette a disposizione due differenti tipologie di connessione tra client e server:
+% \begin{itemize}
+%     \item \textcolor{blue}{Control connection:} connessione dedicata allo scambio di comandi e risposte (come Telnet);
+%     \item \textcolor{blue}{Data connection:} connessione su cui i dati sono trasferiti con modi e tipi specificati. I dati trasferiti possono essere parte di un file, un file o un set di file.
+% \end{itemize}
+
+% FTP è un protocollo \textcolor{purple}{statefull}, infatti il server deve tenere traccia dello stato dell'utente (connessione di controllo associata ad un account, directory attuale,...).
+% \paragraph{Connessione di Controllo} Il clinet FTP contatta il server FTP sulla porta 21 e, una volta ottentuta l'autorizzazione dal server, utilizzerà questa connessione per scambiare comandi. 
+% La comunicazione sulla connessione di controllo avviene per mezzo di caratteri con una codifica standard NVT ASCII, sia per i comandi che per le risposte (Telnet).
+% \\Questa connessione è di tipo \textcolor{purple}{persistente}.
+% \\Quando il client attiva la connessione di controllo con il server, usa un numero di porta assegnato localmente in modo casuale e FTP usa la connessione di controllo per permettere a client e server di coordinare l’uso delle porte assegnate dinamicamente per il trasferimento dati.
+
+% \paragraph{Connessione Dati} 
