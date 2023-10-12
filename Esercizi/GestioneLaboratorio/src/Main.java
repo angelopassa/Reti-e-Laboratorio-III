@@ -24,7 +24,7 @@ public class Main {
             utenti.add(new Studente(monitor));
         }
         for (int i = 0; i < nrTesisti; i++){
-            utenti.add(new Tesista(monitor, (int)(Math.random() * 20)));
+            utenti.add(new Tesista(monitor, ThreadLocalRandom.current().nextInt(0, 19)));
         }
         for (int i = 0; i < nrProfessori; i++){
             utenti.add(new Professore(monitor));
