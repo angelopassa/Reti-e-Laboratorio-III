@@ -438,6 +438,163 @@ NB: POP3 non mantiene informazioni di stato tra sessioni
 IMAP è un altro protocollo di tipo pull per il recupero di messaggi dai Mail server. 
 Presenta più feature di POP3 (per questo è anche più complesso) come la manipolazione dei messaggi memorizzati sul server e comandi per estrarre solo alcune componenti dei messaggi.
 
+\subsection{DNS}
+Agli albori di Internet l'associazione tra nomi logici ed indirizzi IP era statica. 
+Tutte le associazioni erano contenute in un unico file, detto \textcolor{purple}{host file}, e periodicamente gli host prelevavano una versione aggiornata del file, \textcolor{purple}{master host file}, da un server ufficiale.
+Date le dimensioni attuali di Internet, questo approcio è impraticabile per motivi di scalabilità.
+\\
+\\Il \textbf{\textcolor{purple}{DNS}} (Domain Name System) ha l'obiettivo principale di fornire un meccanismo per:
+\begin{itemize}
+    \item specificare la sintassi dei nomi e le regole per gestirli;
+    \item consentire la conversione dei nomi in indirizzi e viceversa.
+\end{itemize}
+Esso è costituito essenzialmente da:
+\begin{itemize}
+    \item uno \textcolor{purple}{schema di assegnazione dei nomi} gerarchico e basato su domini;
+    \item un \textcolor{purple}{database distribuito} contenente i nomi e le corrispondenze con gli indirizzi IP impolementato con una gerarchia di name server;
+    \item un \textcolor{purple}{protocollo} per la distribuzione delle informazioni sui nomi tra name server basato su:
+        \begin{itemize}
+            \item paradigma client/server, in cui i server comunicano tra loro per \textcolor{blue}{risolvere} nomi (traduzione nome/indirizzo);
+            \item protocolli di trasporto UDP e TCP.
+        \end{itemize}
+\end{itemize}
+
+\paragraph{Servizi} I servizi offerti dal DNS sono:
+\begin{itemize}
+    \item \textbf{\textcolor{purple}{Host aliasing:}} Traduzione dei nomi in nome canonico/indirizo IP (un host può avere più nomi dei quali, uno è detto canonico mentre gli altri sinonimi); 
+    \item \textbf{\textcolor{purple}{Mail server aliasing:}} analogo all'host aliasing ma viene distinto perché potrebbero esistere nomi (sinonimi) identitici tra web server e mail server;
+    \item \textbf{\textcolor{purple}{Distribuzione di carico:}} Ad un nome canonico potrebbero essere associati più indirizzi IP (server replicati) ed in questo caso il DNS restituisce la lista di indirizzi IP variandone l'ordinamento ad ogni risposta.
+\end{itemize}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.45]{Immagini/PosizionamentoDNS.png}
+    \caption{Il DNS si frappone tra client e server (Non interagisce mai direttamente con l'utente).}
+\end{figure}
+
+\subsubsection{Spazio dei nomi}
+\paragraph{Struttura dei nomi} I nomi devo permettere di identificare in mood univoco un host. Questi presentano un struttura gerarchica, infatti un nome è costituito da diverse parti (es. \textcolor{green}{lab3}.\textcolor{blue}{di}.\textcolor{red}{unipi}.\textcolor{violet}{it}).
+\\L'assegnazione dei nomi è delegabile, infatti il sistema è in buona parte decentralizzato. La delega avviene a favore dell'autorità per l’assegnazione delle varie parti dello spazio dei nomi.
+\\In questo modo si distribuisce la responsabilità della conversione tra nomi e indrizzi.
+\paragraph{Nomi di dominio} I nomi hanno una struttura ad albero con un numero di livelli variabile ed ogni nodo è identificato da un'etichetta (di massimo 63 caratteri) ed ha un nome di dominio dato da una sequenza di etichette separate da punto. Alla radice è associata un'etichetta vuota.
+\begin{definition}[Dominio] 
+    Con \textcolor{purple}{Dominio} si fa riferimento ad un sottoalbero nello spazio dei nomi di dominio che viene identificato dal nome di dominio del nodo radice del sotto albero.
+\end{definition}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.45]{Immagini/StrutturaNomiDiDominio.png}
+    \caption{Struttura Domini}
+\end{figure}
+
+Un dominio può essere suddiviso in ulteriroi domini detti sottodomini.
+In Internet i nomi gerarchici delle macchine sono assegnati in base alla struttura delle organizzazioni che ottengono l'autorità su porzioni dello spazio dei nomi.
+\\In questo modo è sempre garantità l'univocità dei nomi.
+
+\subsubsection{Gerarchia dei NameServer}
+Per ogni dominio non è presente un unico NameServer ma un insieme di essi, per migliorare le prestazioni e per motivi di sicurezza.
+\begin{definition}[Zona]
+    Una \textcolor{purple}{Zona} è una porzione dello spazio dei nomi di dominio che è gestita da una specifica amministrazione.
+\end{definition} 
+NB: Zona e Dominio non necessariamente conicidono.
+\\\\Ogni server immagazzina le informazioni relative alla propria zona inclusi i riferimenti ai name server dei domini di livello inferiore.
+
+\paragraph{Gerarchia} La gerarchia è così composta:
+\begin{itemize}
+    \item \textbf{\textcolor{purple}{Server Radice:}} responsabile dei record della zona radice, riconosce tutti i domini di massimo livello (TLD - Top Level Domain) e restituisce infomrazioni su essi;
+    \item \textbf{\textcolor{purple}{Server Top-Level Domain:}} mantiene le informazioni dei nomi di dominio che appartengono al suo TLD e restituisce informazioni sui nameserver di competenza dei sottodomini.
+    \item \textbf{\textcolor{purple}{Authoritative Name Server:}} autorità di una certa zona che memorizza nome e indirizzo IP di un insieme di host. Per ogni zona possono essere presenti server di competenza primari e secondari. I server di competenza primari mantengono il file di zona (file contenente le associazioni nome/indirizzo più aggiornate) mentre i server di competenza secondari ricevono il file di zona e offorno il servizio di risoluzione.
+\end{itemize}
+
+\paragraph{Local Name Server}
+Quando un programma (es. browser) deve trasformare un nome in un indirizzo IP chiama un programma in locale detto \textcolor{purple}{resolver}, passando il nome come parametro di ingresso. 
+Se il resolver non ha l’associazione richiesta, interroga un name server di cui conosce l’IP (\textcolor{purple}{Local Name Server})
+Il local name server cerca il nome nelle sue tabelle, se trova l’associazione restituisce l’indirizzo al resolver, altrimenti inoltra la query alla gerarchia DNS.
+\\Il Local Name Server non appartiene strettamente alla gerarchia DNS, ogni ISP (Università, società,...) ha il suo (\textcolor{blue}{defualt}) \textcolor{blue}{name server locale}
+Il server DNS locale opera da proxy e inoltra la query in una gerarchia di server DNS.
+
+\subsubsection{Tipologia di Query} Quando un local name server deve instradare una query alla gerarchia DNS questa può essere gestita in due differenti modalità:
+\begin{itemize}
+    \item \textbf{\textcolor{purple}{Query Iterativa:}} Una volta inoltrata alla gerarchia DNS, il local name server riceverà la traduzione completa del nome, e la geerarchia si occuperà in modo trasparente di tutte le richieste conseguenti alla prima. Questa tipologia di risoluzione delle richieste è vantaggiosa per il local name server perché non ne aumenta il carico.
+    \item \textbf{\textcolor{purple}{Query Ricorsiva:}} Una volta inoltrata alla gerarchia DNS, il local name server ricevevà una risposta contenente i riferimenti per contattare il DNS di competenza per il proseguio della traduzione del nome. Questa tipologia di risoluzione è svantaggiosa per il local name server ma permette di ridurre il carico per la gerarchia.
+\end{itemize}
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.25]{Immagini/Query_Ricorsiva.png}
+    \includegraphics[scale=0.25]{Immagini/Query_Iterativa.png}
+    \caption{Tipologia di Query DNS}
+\end{figure}
+\newpage
+\subsubsection{Caching e aggiornamento Record}
+Per ridurre il carico sulla gerarchia DNS e per ridurre i ritardi, i server DNS presentano un cache nella quale vengono memorizzati i \textcolor{purple}{Resource Record} (associazioni), i quali vengono cancellati dopo un certo tempo (Timeout-TTL).
+\\I Resource Record hanno il seguente formato:
+\begin{center}
+    (\textcolor{blue}{Name},\textcolor{blue}{Value},\textcolor{blue}{Type},\textcolor{blue}{TTL})
+\end{center}
+\begin{itemize}
+    \item TTL, indica quanto il record dovrà essere rimosso dalla cache.
+    \item Type, specifica come devono essere interpretati i campi Name e Value:
+        \begin{itemize}
+            \item Type=A
+                \begin{itemize}
+                    \item Name, Hostname
+                    \item Value, Indirizzo IP
+                \end{itemize}
+            \item Type=CNAME
+                \begin{itemize}
+                    \item Name, Hostname (sinonimo)
+                    \item Value, Hostname (canonico)
+                \end{itemize}
+            \item Type=NS
+                \begin{itemize}
+                    \item Name, Nome di dominio (es. unipi.it)
+                    \item Value, hostname dell'authoritative name server per quel dominio
+                \end{itemize}  
+            \item Type=MX 
+                \begin{itemize}
+                    \item Name, Nome di dominio
+                    \item Value, nome canonico del server di posta associato a name
+                \end{itemize}  
+        \end{itemize}
+\end{itemize}
+
+\subsubsection{Messaggi DNS}
+Come detto in precedenza il protocollo DNS utilizza sia il protocollo UDP che il protocollo TCP. Nello specifio il protocollo TCP viene utilizzato unicamente per il trasferimento di file di grandi dimesioni (es. i file di zona) mentre UDP viene utilizzato per il resto delle comunicazioni.
+Nel procollo DNS inoltre i messaggi di richiesta/risposta presentano il medesimo formato.
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.35]{Immagini/StrutturaMessaggiDNS.png}
+    \caption{Struttura dei messaggi DNS}
+\end{figure}
+I messaggi sono suddivisi in Header e Body. Nell'header sono presenti:
+\begin{itemize}
+    \item \textcolor{purple}{Flags:} che permette di distringuere i messaggi di richiesta e di risposta;
+    \item \textcolor{purple}{Identification:} identificativo a 16 bit che identifica una coppia richiesta/risposta.
+\end{itemize}
+\newpage
+Nel body invece sono presenti:
+\begin{itemize}
+    \item \textcolor{purple}{Questions:} insieme di campi contenenti il nome richiesto e il tipo di query;
+    \item \textcolor{purple}{Answers:} Resource Record relativi alle richieste effettuate;
+    \item \textcolor{purple}{Authority:} Resource Record relativi ai server di competenza;
+\end{itemize}
+
+NB: Nelle risposte sia il campo Answer che Additional possono anche non contenere alucn RR.
+
+\subsubsection{DNS Hijacking}
+Il \textcolor{purple}{DNS Hijacking} (dirottamento) è la pratica di restituire risposte non corrette alle query DNS reindirizzando il client verso siti malevoli.
+Le principali tipologie sono:
+\begin{itemize}
+    \item Local Hijacking
+    \item Router Hijacking
+    \item Rogue Hijacking
+    \item Man-in-the-Middle Attack
+\end{itemize}
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.35]{Immagini/DNS_Hijacking.png}
+    \caption{DNS Hijacking}
+\end{figure}
 % da finire quando lo farà a lezione
 % \subsection{FTP}
 % Il protocollo \textbf{\textcolor{purple}{File Transer Protocol}} è il protocollo standard per il trasferimento file in reti TCP/IP. Offre inoltre altre funzionalità, oltre al semplice trasferimento file, come l'accesso interattivo all'albero delle directory del FileSystem remoto e un accesso con autenticazione.
