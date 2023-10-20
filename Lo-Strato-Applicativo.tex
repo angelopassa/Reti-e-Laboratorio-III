@@ -507,8 +507,94 @@ NB: Zona e Dominio non necessariamente conicidono.
 \end{itemize}
 
 \paragraph{Local Name Server}
+Quando un programma (es. browser) deve trasformare un nome in un indirizzo IP chiama un programma in locale detto \textcolor{purple}{resolver}, passando il nome come parametro di ingresso. 
+Se il resolver non ha l’associazione richiesta, interroga un name server di cui conosce l’IP (\textcolor{purple}{Local Name Server})
+Il local name server cerca il nome nelle sue tabelle, se trova l’associazione restituisce l’indirizzo al resolver, altrimenti inoltra la query alla gerarchia DNS.
+\\Il Local Name Server non appartiene strettamente alla gerarchia DNS, ogni ISP (Università, società,...) ha il suo (\textcolor{blue}{defualt}) \textcolor{blue}{name server locale}
+Il server DNS locale opera da proxy e inoltra la query in una gerarchia di server DNS.
 
+\subsubsection{Tipologia di Query} Quando un local name server deve instradare una query alla gerarchia DNS questa può essere gestita in due differenti modalità:
+\begin{itemize}
+    \item \textbf{\textcolor{purple}{Query Iterativa:}} Una volta inoltrata alla gerarchia DNS, il local name server riceverà la traduzione completa del nome, e la geerarchia si occuperà in modo trasparente di tutte le richieste conseguenti alla prima. Questa tipologia di risoluzione delle richieste è vantaggiosa per il local name server perché non ne aumenta il carico.
+    \item \textbf{\textcolor{purple}{Query Ricorsiva:}} Una volta inoltrata alla gerarchia DNS, il local name server ricevevà una risposta contenente i riferimenti per contattare il DNS di competenza per il proseguio della traduzione del nome. Questa tipologia di risoluzione è svantaggiosa per il local name server ma permette di ridurre il carico per la gerarchia.
+\end{itemize}
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.25]{Immagini/Query_Ricorsiva.png}
+    \includegraphics[scale=0.25]{Immagini/Query_Iterativa.png}
+    \caption{Tipologia di Query DNS}
+\end{figure}
+\newpage
+\subsubsection{Caching e aggiornamento Record}
+Per ridurre il carico sulla gerarchia DNS e per ridurre i ritardi, i server DNS presentano un cache nella quale vengono memorizzati i \textcolor{purple}{Resource Record} (associazioni), i quali vengono cancellati dopo un certo tempo (Timeout-TTL).
+\\I Resource Record hanno il seguente formato:
+\begin{center}
+    (\textcolor{blue}{Name},\textcolor{blue}{Value},\textcolor{blue}{Type},\textcolor{blue}{TTL})
+\end{center}
+\begin{itemize}
+    \item TTL, indica quanto il record dovrà essere rimosso dalla cache.
+    \item Type, specifica come devono essere interpretati i campi Name e Value:
+        \begin{itemize}
+            \item Type=A
+                \begin{itemize}
+                    \item Name, Hostname
+                    \item Value, Indirizzo IP
+                \end{itemize}
+            \item Type=CNAME
+                \begin{itemize}
+                    \item Name, Hostname (sinonimo)
+                    \item Value, Hostname (canonico)
+                \end{itemize}
+            \item Type=NS
+                \begin{itemize}
+                    \item Name, Nome di dominio (es. unipi.it)
+                    \item Value, hostname dell'authoritative name server per quel dominio
+                \end{itemize}  
+            \item Type=MX 
+                \begin{itemize}
+                    \item Name, Nome di dominio
+                    \item Value, nome canonico del server di posta associato a name
+                \end{itemize}  
+        \end{itemize}
+\end{itemize}
 
+\subsubsection{Messaggi DNS}
+Come detto in precedenza il protocollo DNS utilizza sia il protocollo UDP che il protocollo TCP. Nello specifio il protocollo TCP viene utilizzato unicamente per il trasferimento di file di grandi dimesioni (es. i file di zona) mentre UDP viene utilizzato per il resto delle comunicazioni.
+Nel procollo DNS inoltre i messaggi di richiesta/risposta presentano il medesimo formato.
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.35]{Immagini/StrutturaMessaggiDNS.png}
+    \caption{Struttura dei messaggi DNS}
+\end{figure}
+I messaggi sono suddivisi in Header e Body. Nell'header sono presenti:
+\begin{itemize}
+    \item \textcolor{purple}{Flags:} che permette di distringuere i messaggi di richiesta e di risposta;
+    \item \textcolor{purple}{Identification:} identificativo a 16 bit che identifica una coppia richiesta/risposta.
+\end{itemize}
+\newpage
+Nel body invece sono presenti:
+\begin{itemize}
+    \item \textcolor{purple}{Questions:} insieme di campi contenenti il nome richiesto e il tipo di query;
+    \item \textcolor{purple}{Answers:} Resource Record relativi alle richieste effettuate;
+    \item \textcolor{purple}{Authority:} Resource Record relativi ai server di competenza;
+\end{itemize}
+
+NB: Nelle risposte sia il campo Answer che Additional possono anche non contenere alucn RR.
+
+\subsubsection{DNS Hijacking}
+Il \textcolor{purple}{DNS Hijacking} (dirottamento) è la pratica di restituire risposte non corrette alle query DNS reindirizzando il client verso siti malevoli.
+Le principali tipologie sono:
+\begin{itemize}
+    \item Local Hijacking
+    \item Router Hijacking
+    \item Rogue Hijacking
+    \item Man-in-the-Middle Attack
+\end{itemize}
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.35]{Immagini/DNS_Hijacking.png}
+    \caption{DNS Hijacking}
+\end{figure}
 % da finire quando lo farà a lezione
 % \subsection{FTP}
 % Il protocollo \textbf{\textcolor{purple}{File Transer Protocol}} è il protocollo standard per il trasferimento file in reti TCP/IP. Offre inoltre altre funzionalità, oltre al semplice trasferimento file, come l'accesso interattivo all'albero delle directory del FileSystem remoto e un accesso con autenticazione.
