@@ -38,7 +38,8 @@ public class Tutor {
             this.size++;
 
         }else if(utente instanceof Studente){
-            while((Computer[0] instanceof Professore) || this.size >= this.maxSize || this.profInAttesa() || this.tesistaInAttesa()){
+            int i;
+            while((Computer[0] instanceof Professore) || this.profInAttesa() || (i = this.pcLibero()) == -1){
                 try{
                     wait();
                 }catch (InterruptedException e){
@@ -46,13 +47,9 @@ public class Tutor {
             }
 
             ListaDiAttesa.remove(utente);
-            for (int i = 0; i < this.maxSize; i++){
-                if (this.Computer[i] == null){
-                    this.Computer[i] = utente;
-                    this.size++;
-                    break;
-                }
-            }
+            ((Studente) utente).setPcAssegnato(i);
+            this.Computer[i] = utente;
+            this.size++;
         }
     }
 
@@ -61,21 +58,32 @@ public class Tutor {
         notifyAll();
     }
 
-    private boolean profInAttesa(){
+    private synchronized boolean profInAttesa(){
         for (Utente utente: this.ListaDiAttesa) {
             if (utente instanceof Professore) return true;
         }
         return false;
     }
 
-    private boolean tesistaInAttesa(){
+    private synchronized int pcLibero(){
+        LinkedList<Integer> computerDaOccupare = new LinkedList<Integer>();
+
         for (Utente utente: this.ListaDiAttesa) {
-            if (utente instanceof Tesista) return true;
+            if (utente instanceof Tesista){
+                computerDaOccupare.add(((Tesista) utente).getPcRichiesto());
+            }
         }
-        return false;
+
+        for (int i = 0; i < this.maxSize; i++){
+            if(!computerDaOccupare.contains(i) && this.Computer[i] == null){
+                return i;
+            }
+        }
+
+        return -1;
     }
 
-    private void remove(Utente r){
+    private synchronized void remove(Utente r){
         for (int i = 0; i < this.maxSize; i++){
             if (this.Computer[i] == r){
                 this.Computer[i] = null;
@@ -84,5 +92,4 @@ public class Tutor {
             }
         }
     }
-
 }
