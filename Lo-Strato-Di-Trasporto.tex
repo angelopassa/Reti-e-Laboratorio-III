@@ -68,3 +68,80 @@ Una possibile consegnenza di ciò è che un host server può supportare più con
     \includegraphics[scale=0.48]{Immagini/DemultiplexingTCP.png}
     \caption{Demultiplexing TCP.}
 \end{figure}
+
+\subsection{TCP}
+Il protocollo TCP come detto è uno dei due principali protocolli offerti dal livello di trasporto.
+Questo presenta una serie di proprietà quali:
+\begin{itemize}
+    \item \textbf{\textcolor{purple}{Orientamento allo stream:}} i dati vengono visti come un flusso continuo di byte ordinati, ma non strutturati. 
+    La lunghezza di questo fullo è indefinita ma la macchina destinazione riceve esattamente la stessa sequenza di byte che la macchina mittente ha inviato.
+    \item \textbf{\textcolor{purple}{Orientamento alla connessione:}} prima che avvenga lo scambio di dati i processi residenti sulle due macchine effettuano un \textcolor{purple}{handshake}, una procedura di scambio di informazioni preliminari. 
+    \\Viene detto \textcolor{purple}{orientato} alla connessione perchè lo stato della connessione risiede sui punti terminali e non sugli elementi intermedi.
+    TCP quindi fornisce agli \textcolor{blue}{USER} l'illusione di avere un circuito dedicato fornendo loro un servizio \textcolor{blue}{Connection Oriented}, basandosi però sul protocollo di rete IP il quale fornisce servizio un \textcolor{blue}{Connection Less}.
+    \item \textbf{\textcolor{purple}{Connessione full-duplex:}} il flusso di dati tra due host può avvenire contemporaneamente nelle due direzioni; queste infatti sono slegate tra loro.
+    \item \textbf{\textcolor{purple}{Trasferimento bufferizzato:}}TCP è in grado di suddividere il flusso di byte in segmenti in modo indipendente dal programma applicativo che li ha generati. 
+    Appena i dati sono sufficienti per riempire un segmento ragionevolmente grande, questo viene trasmesso attraverso la rete. Ciò viene implementato tramite l'utilizzo di un buffer.
+    \\La bufferizzazione consente una riduzione del traffico sulla rete "ottimizzando" in qualche modo il numero di segmenti da trasmettere.
+    \item \textbf{\textcolor{purple}{Ordinamento e affidabilità:}}si intende la capacità di correggere errori quali:
+    \begin{itemize}
+        \item \textcolor{blue}{dati corrotti};
+        \item \textcolor{blue}{segmenti persi};
+        \item \textcolor{blue}{segmenti duplicati};
+        \item \textcolor{blue}{segmenti fuori sequenza}.
+    \end{itemize}
+    Questo viene fatto tramite una serie di controlli:
+    \begin{itemize}
+        \item \textcolor{purple}{Controllo di sessione:} meccanismi di inizio e fine trasmissione;
+        \item \textcolor{purple}{Controllo di flusso:} evitare di spedire più dati di quanti il ricevente sia in grado di trattare;
+        \item \textcolor{purple}{Controllo di congestione:} ha lo scopo di recuperare situazioni di sovraccarico nella rete.
+    \end{itemize}
+    
+\end{itemize}
+
+\paragraph{Trasferimento bufferizzato}
+I processi al livello applicativo che utliizzano TCP scrivono/leggono dal buffer (spessso a velocità diverse) ed essendo la comunicazione bidirezionale, entrambi i lati avranno un buffer di invio e un buffer di ricezione.
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.48]{Immagini/BufferizzazioneTCP.png}
+    \caption{Bufferizzazione TCP.}
+\end{figure}
+
+Il flusso di byte viene partizionato in segmenti, oguno dei quali ha il suo header, i quali vengono poi consegnati al livello IP.
+
+\subsubsection{Formato Segmento}
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.45]{Immagini/FormatoSegmentoTCP.png}
+    \caption{Formato segmento TCP.}
+\end{figure}
+
+La semantica dei campi dei campi dell'header TCP è la seguente:
+\begin{itemize}
+    \item \textcolor{purple}{Numero di sequenza:} è il numero di sequenza nello stream del primo byte di dati di questo segmento. In TCP infatti vengono numerati i byte e non i segmenti, partendo da un numero casuale !=0. 
+    Se il flag SYN è settato il numero di sequenza è \textcolor{purple}{ISN} (Initial Sequence Number) e il primo byte di dati è ISN+1.
+    \item \textcolor{purple}{Numero di riscontro:} se il bit ACK è settato, questo campo contiene il valore del prossimo numero di sequenza che il mittente del segmento si aspetta di ricevere dall’altro host. 
+    Una volta che la connessione è stabilita è sempre inviato.
+    \item \textcolor{purple}{Finestra di ricezione:}  indica il numero di byte di dati a partire da quello indicato nel campo \textcolor{blue}{Numero di Riscontro} che il mittente di questo segmento è in grado di accettare. 
+\end{itemize}
+
+Questi tre campi sono essenziali in quanto permettono di realizzare il \textcolor{blue}{flow control}, il \textcolor{blue}{meccanismo di ritrasmissione} e il \textcolor{blue}{meccanismo di riordino} dei pacchetti in ricezione, necessari per la struttura stream-based del TCP.
+
+\begin{itemize}
+    \item \textcolor{purple}{Hlen:} lunghezza dell'header TCP espressa in parole da 4 byte.
+    \item \textcolor{purple}{Checksum:} checksum dell'intero pacchetto (dati, header TCP e parte dell'header IP) che permette di rilevare errori.
+    \item \textcolor{purple}{Puntatore Urgente:} questo campo è un offset positivo a partire dal \textcolor{blue}{Numero di Sequenza} del segmento corrente. 
+    Punta al primo byte di dati \underline{non} urgenti a partire dal \textcolor{blue}{Numero di Sequenza}, e consente di far passare i dati urgenti in testa alla coda di ricezione. 
+    Nel segmento contenente dati urgenti deve essere presente almeno un byte di dati.
+    \item \textcolor{purple}{Bit codice:} sono 6 flag e servono per
+        \begin{itemize}
+            \item \textcolor{blue}{URG:} Il campo Puntatore Urgente è significativo e ci sono dati da trasferire in via prioritaria.
+            \item \textcolor{blue}{ACK:} Il campo Numero di Riscontro contiene dati significativi.
+            \item \textcolor{blue}{PSH:} Funzione Push (trasferimento immediato dei dati in un segmento dal trasporto al livello applicativo)
+            \item \textcolor{blue}{RST:} Reset della connessione
+            \item \textcolor{blue}{SYN:} Sincronizza il Numero di Sequenza
+            \item \textcolor{blue}{FIN:} Non ci sono altri dati dal mittente, chiusura della connessione
+        \end{itemize}
+    \item \textcolor{purple}{Opzioni} \underline{(facoltativo, lunghezza variabile, max 40 byte)}: negoziazione di vari parametri; ad es. dimensione massima segmento (MSS), selective acknowledgement supportato e blocchi di dati riscontrati selettivamente. Le opzioni sono sempre multipli di 8 bit e il loro valore è considerato per il calcolo della checksum.
+\end{itemize}
+
+\subsubsection{Gestione della Connessione}
