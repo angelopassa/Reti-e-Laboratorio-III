@@ -145,3 +145,68 @@ Questi tre campi sono essenziali in quanto permettono di realizzare il \textcolo
 \end{itemize}
 
 \subsubsection{Gestione della Connessione}
+\paragraph{Apertura} L'apertura della connnessione avviene tramite un processo denominato \textcolor{purple}{Handshaking a tre vie}.
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.37]{Immagini/HandShakingTreVieTCP.png}
+    \caption{Handshaking a tre vie.}
+\end{figure}
+\begin{enumerate}
+    \item Il client invia una richiesta di connessione a un server TCP, tramite un segmento senza dati, con il bit SYN settato e un ISN (Initial Sequence Number).
+    \item Il server estrae il segmento, alloca i buffer e le variabili TCP per la connessione.
+    Invia in risposta al client un segmento di connessione garantita (denominato \textcolor{purple}{SYNACK}) nel quale appunto sono settati i bit SYN e ACK. Sono inoltre presenti l'ISN e il Numero di Riscontro. 
+    \item Una volta ricevuto il segmento di risposta dal server, il client può a sua volta allocare buffer e variabili di connessione. Invia infine un segmento al server con il bit ACK settato, nel quale sono presenti Numero di Riscontro e Numero di Sequenza. In questo segmento possono già essere trasportati dati.
+\end{enumerate}
+
+NB: Dopo l'handshaking a livello di trasporto non c'è più distinzione tra client e server.
+
+\paragraph{Chiusura} La chiusura della connessione può avvenire indipendentemente nelle due direzioni (in questo caso si parla di \textcolor{purple}{half-close}). Quando un host vuole chiudere il suo lato della connessione (non vuole inviare altri dati) invia all' altro host un segmento contenente il flag FIN settato e riceverà da questo un segmento con il flag ACK settato.
+Se entrambi gli host vogliono chiudere la connessione una volta ricevuto un segmento con FIN settato, si può rispondere con ACK e FIN contemporaneamente. È anche possibile lo scambio simultaneo di FIN.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.35]{Immagini/ChiusuraConnessioneTCP.png}
+    \caption{Chiusura connessione TCP.}
+\end{figure}
+
+\begin{definition}[Stato TIME-WAIT] 
+    \textcolor{purple}{TIME-WAIT} è lo stato finale in cui il capo di una connessione che esegue la chiusura attiva resta prima di passare alla chiusura definitiva della connessione.
+    La durata di TIME-WAIT è data da 2 volte MSL (Maximum Segment Lifetime), cioè la stima del massimo periodo di tempo che un pacchetto IP può vivere sulla rete.
+\end{definition}
+
+TIME-WAIT viene utlizzato pricipalmente per:
+\begin{enumerate}
+    \item implementare in maniera affidabile la terminazione della connessione in entrambe le direzioni.
+    \item consentire l'eliminazione dei segmenti duplicati in rete.
+\end{enumerate}
+
+\newpage
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.52]{Immagini/ConnessioneTCP.png}
+    \caption{Connessione TCP.}
+\end{figure}
+
+\newpage
+
+\paragraph{Stati del TCP}
+In ogni momento di una connessione tra due host mediante il protocollo TCP ci si trova in uno specifico stato definito dal seguente schema.
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.3]{Immagini/StatiTCP.png}
+    \caption{Stati del TCP.}
+\end{figure}
+\begin{itemize}
+    \item \textcolor{purple}{LISTEN}
+    \item \textcolor{purple}{SYN-SENT}
+    \item \textcolor{purple}{SYN-RECEIVED}
+    \item \textcolor{purple}{ESTABLISHE}
+    \item \textcolor{purple}{FIN-WAIT-1}
+    \item \textcolor{purple}{FIN-WAIT-2}
+    \item \textcolor{purple}{CLOSE-WAIT}
+    \item \textcolor{purple}{CLOSING}
+    \item \textcolor{purple}{LAST-ACK}
+    \item \textcolor{purple}{TIME-WAIT}
+    \item \textcolor{purple}{CLOSED}
+\end{itemize}
