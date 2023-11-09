@@ -606,11 +606,55 @@ Il protocollo \textbf{\textcolor{purple}{File Transer Protocol}} è il protocoll
     \item \textcolor{blue}{Control connection:} connessione dedicata allo scambio di comandi e risposte (come Telnet);
     \item \textcolor{blue}{Data connection:} connessione su cui i dati sono trasferiti con modi e tipi specificati. I dati trasferiti possono essere parte di un file, un file o un set di file.
 \end{itemize}
- 
 FTP è un protocollo \textcolor{purple}{statefull}, infatti il server deve tenere traccia dello stato dell'utente (connessione di controllo associata ad un account, directory attuale,...).
 \paragraph{Connessione di Controllo} Il clinet FTP contatta il server FTP sulla porta 21 e, una volta ottentuta l'autorizzazione dal server, utilizzerà questa connessione per scambiare comandi. 
 La comunicazione sulla connessione di controllo avviene per mezzo di caratteri con una codifica standard NVT ASCII, sia per i comandi che per le risposte (Telnet).
 \\Questa connessione è di tipo \textcolor{purple}{persistente}.
 \\Quando il client attiva la connessione di controllo con il server, usa un numero di porta assegnato localmente in modo casuale e FTP usa la connessione di controllo per permettere a client e server di coordinare l’uso delle porte assegnate dinamicamente per il trasferimento dati.
- 
+
 \paragraph{Connessione Dati} 
+Quando il server riceve un comando per trasferire un file (da o verso il client) sulla connessione di controllo, il server apre unà altra connessione dati TCP con il client (\textcolor{blue}{Active Mode}). Il file viene trasferito da o verso il client e la connessione viene immediatamente interrotta
+\\La Connessione Dati è perciò una connessione \textcolor{purple}{non persistente} e ne viene creata una per ogni interazione di trasmissione (non una per file, si possono infatti inviare anche set di file come detto in precedenza).
+\\Questa non è l'unica modalità possibile, infatti esiste anche la \textcolor{blue}{Passive Mode} in cui è il client ad aprire la connessione verso il server, solo dopo avergli chiesto, tramite la connessione di controllo, di mettersi in ascolto un una determinata porta.
+
+\newblock
+\paragraph{Modalità di trasmissione}
+Il client e i server FTP sono spesso molto diversi tra loro (SO, FiieSystem...). Prima di effettuare un trasferimento file il client deve definire:
+\begin{itemize}
+    \item il tipo di file;
+    \item struttura dati;
+    \item modalità di trasmissione.
+\end{itemize}
+al fine di risolvere problemi di eterogeneità tra client e server.
+\\Le principali modalità di trasmissione sono:
+\begin{itemize}
+    \item \textcolor{purple}{Stream Mode:} FTP invia i dati a TCP come un flusso continuo di bit;
+    \item \textcolor{purple}{Block Mode:} FTP invia i dati a TCP suddivisi in blocchi. Ogni blocco è preceduto da un header;
+    \item \textcolor{purple}{Compressed Mode:} Il vile viene trasmesso compresso.
+\end{itemize}
+
+\paragraph{Anonymous FTP}
+Esistono server che supportano connessioni FTP senza autenticazione, in generale permettono un accesso limitato al FileSystem con un sottoinsieme ridotto di funzionalità.
+
+\paragraph{FTPS}
+Modalità che può essere usato da client e server FTP per implementare sicurezza e autenticazione usando il protocollo TLS.
+
+\paragraph{Esempio di FTP}
+\begin{mdframed}
+    ftp\\
+    ftp$>$ open \textcolor{orange}{ftp.ed.ac.uk}\\
+    \textcolor{blue}{220 FTP Server}\\
+    Utente (luther.is.ed.ac.uk:(none)):ftp\\
+    \textcolor{blue}{331 Anonymous login ok, send your complete email address as your password}\\
+    Password:\\
+    \textcolor{blue}{230 Anonymous access granted, restrictions apply}\\
+    ftp$>$ ls\\
+    \textcolor{blue}{200 PORT command successful\\
+    150 Opening ASCII mode data connection for file list}\\
+    \textcolor{purple}{incoming\\
+    pub\\
+    INSTRUCTIONS-FOR-USING-THIS-SERVICE\\
+    edupload\\}
+    \textcolor{blue}{226 Transfer complete\\
+    ftp: 65 bytes received in 0.03secondi (2.60Kbyte/sec)}
+\end{mdframed}
