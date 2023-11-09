@@ -198,15 +198,17 @@ In ogni momento di una connessione tra due host mediante il protocollo TCP ci si
     \caption{Stati del TCP.}
 \end{figure}
 \begin{itemize}
-    \item \textcolor{purple}{LISTEN}
-    \item \textcolor{purple}{SYN-SENT}
-    \item \textcolor{purple}{SYN-RECEIVED}
-    \item \textcolor{purple}{ESTABLISHE}
-    \item \textcolor{purple}{FIN-WAIT-1}
-    \item \textcolor{purple}{FIN-WAIT-2}
-    \item \textcolor{purple}{CLOSE-WAIT}
-    \item \textcolor{purple}{CLOSING}
-    \item \textcolor{purple}{LAST-ACK}
-    \item \textcolor{purple}{TIME-WAIT}
-    \item \textcolor{purple}{CLOSED}
+    \item \textcolor{purple}{LISTEN:} rappresenta l'attesa per una richiesta di connessione da un host TCP remoto.
+    \item \textcolor{purple}{SYN-SENT:} rappresenta l'attesa di una risposta dovuta ad una richiesta di connessione.
+    \item \textcolor{purple}{SYN-RECEIVED:} rappresenta l'attesa per la conferma dovuta alla ricezione e successivo inoltro di una richiesta di connessione.
+    \item \textcolor{purple}{ESTABLISHED:} rappresenta una connessione aperta, i dati ricevuti possono essere trasferiti all'utente. Stato durante la fase di trasferimento dati di una connessione.
+    \item \textcolor{purple}{FIN-WAIT-1:} rappresenta l'attesa di una richiesta di chiusura della connessione da parte dell'host remoto, oppure un attesa di una risposta di accettazione di una richiesta di terminazione della connessione precedentemente inviata all'host remoto.
+    \item \textcolor{purple}{FIN-WAIT-2:} rappresenta l'attesa di una richiesta di chiusura della connessione da parte dell'host remoto.
+    \item \textcolor{purple}{CLOSE-WAIT:} rappresenta l'attesa di una richiesta di chiusura della connessione da parte dell'utente locale.
+    \item \textcolor{purple}{CLOSING:} rappresenta l'attesa dell'accettazione di una richiesta di chiusura della connessione dall'host remoto.
+    \item \textcolor{purple}{LAST-ACK:} rappresenta l'attesa dell'accettazione di una richiesta di chiusura della connessione precedentement inviata all'host remoto (che include l'accettazione della sua richiesta di chiusura della connessione).
+    \item \textcolor{purple}{TIME-WAIT:} rappresenta l'attesa per una certa durata di tempo per essere sicuri che l'host remoto abbia ricevuto l'accettazione per la sua richiesta di chiusura della connessione.
+    \item \textcolor{purple}{CLOSED:} rappresenta l'assenza di alcun tipo di connessione.
 \end{itemize}
+
+\paragraph{affidabilità e Controlli}
