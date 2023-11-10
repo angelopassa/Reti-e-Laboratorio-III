@@ -79,10 +79,10 @@ Questo presenta una serie di proprietà quali:
     \\Viene detto \textcolor{purple}{orientato} alla connessione perchè lo stato della connessione risiede sui punti terminali e non sugli elementi intermedi.
     TCP quindi fornisce agli \textcolor{blue}{USER} l'illusione di avere un circuito dedicato fornendo loro un servizio \textcolor{blue}{Connection Oriented}, basandosi però sul protocollo di rete IP il quale fornisce servizio un \textcolor{blue}{Connection Less}.
     \item \textbf{\textcolor{purple}{Connessione full-duplex:}} il flusso di dati tra due host può avvenire contemporaneamente nelle due direzioni; queste infatti sono slegate tra loro.
-    \item \textbf{\textcolor{purple}{Trasferimento bufferizzato:}}TCP è in grado di suddividere il flusso di byte in segmenti in modo indipendente dal programma applicativo che li ha generati. 
+    \item \textbf{\textcolor{purple}{Trasferimento bufferizzato:}} TCP è in grado di suddividere il flusso di byte in segmenti in modo indipendente dal programma applicativo che li ha generati. 
     Appena i dati sono sufficienti per riempire un segmento ragionevolmente grande, questo viene trasmesso attraverso la rete. Ciò viene implementato tramite l'utilizzo di un buffer.
     \\La bufferizzazione consente una riduzione del traffico sulla rete "ottimizzando" in qualche modo il numero di segmenti da trasmettere.
-    \item \textbf{\textcolor{purple}{Ordinamento e affidabilità:}}si intende la capacità di correggere errori quali:
+    \item \textbf{\textcolor{purple}{Ordinamento e affidabilità:}} si intende la capacità di correggere errori quali:
     \begin{itemize}
         \item \textcolor{blue}{dati corrotti};
         \item \textcolor{blue}{segmenti persi};
@@ -162,6 +162,7 @@ NB: Dopo l'handshaking a livello di trasporto non c'è più distinzione tra clie
 
 \paragraph{Chiusura} La chiusura della connessione può avvenire indipendentemente nelle due direzioni (in questo caso si parla di \textcolor{purple}{half-close}). Quando un host vuole chiudere il suo lato della connessione (non vuole inviare altri dati) invia all' altro host un segmento contenente il flag FIN settato e riceverà da questo un segmento con il flag ACK settato.
 Se entrambi gli host vogliono chiudere la connessione una volta ricevuto un segmento con FIN settato, si può rispondere con ACK e FIN contemporaneamente. È anche possibile lo scambio simultaneo di FIN.
+\\I segmenti contenti i campi FIN settati per la chiusura della connessione non trasportano dati.
 
 \begin{figure}[h]
     \centering
@@ -171,7 +172,7 @@ Se entrambi gli host vogliono chiudere la connessione una volta ricevuto un segm
 
 \begin{definition}[Stato TIME-WAIT] 
     \textcolor{purple}{TIME-WAIT} è lo stato finale in cui il capo di una connessione che esegue la chiusura attiva resta prima di passare alla chiusura definitiva della connessione.
-    La durata di TIME-WAIT è data da 2 volte MSL (Maximum Segment Lifetime), cioè la stima del massimo periodo di tempo che un pacchetto IP può vivere sulla rete.
+    La durata di TIME-WAIT è data da 2 volte \textcolor{purple}{MSL} (Maximum Segment Lifetime), cioè la stima del massimo periodo di tempo che un pacchetto IP può vivere sulla rete.
 \end{definition}
 
 TIME-WAIT viene utlizzato pricipalmente per:
@@ -211,4 +212,101 @@ In ogni momento di una connessione tra due host mediante il protocollo TCP ci si
     \item \textcolor{purple}{CLOSED:} rappresenta l'assenza di alcun tipo di connessione.
 \end{itemize}
 
-\paragraph{affidabilità e Controlli}
+\paragraph{Affidabilità e Controlli}
+Per permettere un trasferimento dati affidabile TCP, nonostante si basi sul servizio di rete inaffibabile IP, presenta dei meccanismi capaci di corregere gli errori. 
+Come detto per fare ciò utilizza i Numeri di Sequenza e di Riscontro.
+Utilizza inoltre un \textcolor{purple}{timer di ritrasmissione} detto RTO (che viene avviato se non è già in funzione per un qualche altro segmento)
+
+La ritrasmissione dei segmenti è dovuta:
+\begin{itemize}
+    \item \textcolor{purple}{Timout RTO:} se non abbiamo ricevuto riscontro di uno o più segmenti e che quindi hanno causato il timeout. 
+    Il timer viene riavviato
+    \item \textcolor{purple}{ACK duplicato:} se il mittente riceve tre ACK duplicati, il segmento successivo a quello riscontrato è andato perso. 
+    In questo caso si utilizza il meccanismo di \textcolor{blue}{Ritrasmissione veloce}, ovvero si ri-inoltrano i segmenti prima del timout del timer.
+\end{itemize}
+
+I segmenti possono arrivare al destinatario \textcolor{purple}{fuori sequenza}.
+In questo caso TCP non specifica come questi segmenti devono essere gestiti dal destinatario, dipende dall'implementazione.
+Nelle versioni più recenti si implementa la \textcolor{purple}{Selective ACK} (SACK)
+\begin{itemize}
+    \item i pacchetti ricevuti fuori sequenza vengono memorizzati;
+    \item riscontro di pacchetti fuori sequenza e duplicati inviato in OPTIONS.
+\end{itemize}
+
+Le regole di comunicazione sono le seguenti
+\begin{enumerate}
+    \item Tutti i segmenti inviati al destinatario contenenti dati presenentano ACK settato.
+    \item Se il destinatario non ha dati da inviare e riceve segmento in sequenza, ritarda invio ACK di 500ms a meno che non riceva un nuovo segmento.
+    \item Se il destinatario riceve il segmento atteso e il precedente non è stato riscontrato, allora invia immediatamente ACK.
+    \item Se il destinatario riceve un segmento fuori sequenza, (5.) presenta un $"$buco nella sequenza$"$ o ancora (6.) un segmento duplicato, invia immediatamente un segmento ACK (indicando il prossimo numero atteso).
+\end{enumerate}
+
+\paragraph{Esempi} di operatività del TCP:
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.26]{Immagini/OperativitàNormaleTCP.png}
+    \caption{Operativià normale TCP.}
+\end{figure}
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.26]{Immagini/TCPSegmentoSmarrito.png}
+    \caption{Segmento smarrito TCP.}
+\end{figure}
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.29]{Immagini/TCPRitrasmissioneVeloce.png}
+    \caption{Ritrasmissione veloce TCP.}
+\end{figure}
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.27]{Immagini/TCPRiscontroPersoCorrettoDaRitrasmissione.png}
+    \caption{Riscontro perso corretto da ritrasmissione TCP.}
+\end{figure}
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.28]{Immagini/TCPRiscontroSmarrito.png}
+    \caption{Ricontro smarrito TCP.}
+\end{figure}
+
+\newblock\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+\paragraph{Calcolo del Timeout}
+Il tempo ti timeout RTO come visto svolge un ruolo fondamentale per il corretto funzionamento del TCP ed è quindi necessario assegnargli un valore corretto.
+Questo deve essere maggiore di \textcolor{purple}{RTT} (Round Trip Time), ovvero il tempo trascorso dall'invio di un segmento alla ricezione del suo riscontro.
+RTT viene calcolato analizzando gli RTT dei segmenti non ritrasmessi ed è dato da
+\begin{center}
+    Estimated RTT = (1 - a) * EstimatedRTT + a * Sample RTT
+\end{center}
+Sample RTT stimato per un segmento trasmesso in una certa unità di tempo (non per ogni invio) e può variare nel tempo.
+Il valore di a viene posto a 1/8 in modo da rendere via via meno importanti gli RTT dei pacchetti più vecchi.
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.46]{Immagini/EstimatedRTT.png}
+    \caption{Ricontro smarrito TCP.}
+\end{figure}
+\newpage
+Oltre al valore RTT stimato è necessario anche una stima della variabilità di RTT data dalla seguente formula
+\begin{center}
+    RTT\textsubscript{DEV} = (1-b) RTT\textsubscript{DEV} + b * $|$RTT\textsubscript{Sample} - RTT\textsubscript{Estimated}$|$
+\end{center}
+stima di quanto SampleRTT si discosta da EstimatedRTT.
+Il valore b viene posto a 1/4
+\\Una volta definiti questi valori l'RTO viene normalmente calcolato come
+\begin{center}
+    RTO = (1-b) RTT\textsubscript{Estimated} + 4 * RTT\textsubscript{Dev}
+\end{center}
+In molte implementazioni, dopo un errore (es. ACK non ricevuto) si raddoppia il timeout; si tratta di un primo meccanismo di controllo della congestione.
+
+\paragraph{Finistra di Trasmissione}
+I dati inviati dal processo a livello applicativo sono mantenuti nel buffer di invio.
+La trasmissione dei dati si basa sulla \textcolor{purple}{finestra di trasmissione} (sliding window):
+\begin{itemize}
+    \item finestra sovrapposta sulla sequenza da trasmettere;
+    \item negoziata dinamicamente;
+    \item viene fatta avanzare alla ricezione di un ACK.
+\end{itemize}
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.35]{Immagini/FinestraDiTrasmissione.png}
+    \caption{Finestra di trasmissione TCP.}
+\end{figure}
+
