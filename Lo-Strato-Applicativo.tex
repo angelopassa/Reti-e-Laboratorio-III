@@ -606,7 +606,6 @@ Il protocollo \textbf{\textcolor{purple}{File Transer Protocol}} è il protocoll
     \item \textcolor{blue}{Control connection:} connessione dedicata allo scambio di comandi e risposte (come Telnet);
     \item \textcolor{blue}{Data connection:} connessione su cui i dati sono trasferiti con modi e tipi specificati. I dati trasferiti possono essere parte di un file, un file o un set di file.
 \end{itemize}
-
 FTP è un protocollo \textcolor{purple}{statefull}, infatti il server deve tenere traccia dello stato dell'utente (connessione di controllo associata ad un account, directory attuale,...).
 \paragraph{Connessione di Controllo} Il clinet FTP contatta il server FTP sulla porta 21 e, una volta ottentuta l'autorizzazione dal server, utilizzerà questa connessione per scambiare comandi. 
 La comunicazione sulla connessione di controllo avviene per mezzo di caratteri con una codifica standard NVT ASCII, sia per i comandi che per le risposte (Telnet).
