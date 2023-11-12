@@ -310,3 +310,57 @@ La trasmissione dei dati si basa sulla \textcolor{purple}{finestra di trasmissio
     \caption{Finestra di trasmissione TCP.}
 \end{figure}
 
+\paragraph{Controllo di Flusso}
+
+\begin{definition}
+Con \textbf{\textcolor{purple}{controllo di flusso}} si intende la capacità del mittente di evitare la possibilità di saturare il buffer del ricevitore.
+\end{definition}
+
+Il controllo di flusso mette in relazione la frequenza di invio del mittente con la frequenza di lettura dell'applicazione ricevente.
+TCP implementa questa caratteristica tramite una variabile detta \textcolor{purple}{finestra di ricezione} (rwnd) mantenuta nel mittente. 
+Questa variabile fornisce un'idea di quanto spazio è ancora a disposizione nel buffer del ricevitore, ed è quindi un valore dinamico. 
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.35]{Immagini/FinestraDiRicezioneTCP.png}
+    \caption{Finestra di ricezione TCP.}
+\end{figure}
+
+Il destinatario comunica il valore della variabile rwnd tramite l'\textcolor{blue}{rwnd field} nell'header TCP. 
+Il mittente sarà così in grado di limitare la quantità di dati \textcolor{purple}{unACKed} ("in-flight").
+Inoltre la dimensione del buffer di ricezione è conigurabile tramite socket options ed è denomintata \textcolor{blue}{RcvBuffer} (dimensione standard 4096 bytes).
+
+Il valore di rwnd viene calcolato come:
+\begin{center}
+    Rwnd = RcvBuffer - (LastByteReceived - LastByteRead)
+\end{center}
+\newpage
+Il mittente si assicura che
+\begin{center}
+    LastByteSent - LastByteAcked $<$= Rwnd
+\end{center}
+cioè che la quantità di dati trasmessi e non ancora riscontrati sia minore della finetra di ricezione.
+Se rwnd=0, il mittente manda segmenti "sonda" di 1 byte per ricevere aggiornamenti sul valore di rwnd.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.45]{Immagini/TCPEsempioTrasmissioneFinestraDiRicezione.png}
+    \caption{Esempio trasmissione con finestra di ricezione.}
+\end{figure}
+
+\paragraph{Controllo di Congestione}
+
+Il fenomeno della \textcolor{purple}{congestione} è originato dal tentativo di più sorgenti di richiedere più banda di quella disponibile sul percorso, ovvero troppe sorgenti che trasmettono troppi dati a una velocità elevata per cui la rete non è in grado di gestirli.
+
+Il traffico eccessivo nella rete può provocare:
+\begin{itemize}
+    \item Lunghi ritardi, dovuti all'accodamento dei pacchetti nei buffer dei ruouter;
+    \item Perdita di pacchetti, dovuta ad overflow dei buffer dei router.
+\end{itemize}
+
+TCP è in grado di implementare meccanismi di congestione senza bisogno di supporto esplicito da parte della rete, imponendo a ciascun mittente di limitare l'invio di pacchetti in rete in funzione della \textcolor{purple}{congestine percepita}. 
+
+In generale TCP è in grado di adattarsi alla velocità della rete. 
+Se infatti "percepisce" scarso traffico, aumenta la frequenza di invio altrimenti la diminuisce.
+
+
