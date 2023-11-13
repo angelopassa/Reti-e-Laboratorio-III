@@ -212,7 +212,7 @@ In ogni momento di una connessione tra due host mediante il protocollo TCP ci si
     \item \textcolor{purple}{CLOSED:} rappresenta l'assenza di alcun tipo di connessione.
 \end{itemize}
 
-\paragraph{Affidabilità e Controlli}
+\subsubsection{Affidabilità e Controlli}
 Per permettere un trasferimento dati affidabile TCP, nonostante si basi sul servizio di rete inaffibabile IP, presenta dei meccanismi capaci di corregere gli errori. 
 Come detto per fare ciò utilizza i Numeri di Sequenza e di Riscontro.
 Utilizza inoltre un \textcolor{purple}{timer di ritrasmissione} detto RTO (che viene avviato se non è già in funzione per un qualche altro segmento)
@@ -247,28 +247,28 @@ Le regole di comunicazione sono le seguenti
     \includegraphics[scale=0.26]{Immagini/OperativitàNormaleTCP.png}
     \caption{Operativià normale TCP.}
 \end{figure}
-\begin{figure}[h]
+\begin{figure}
     \centering
     \includegraphics[scale=0.26]{Immagini/TCPSegmentoSmarrito.png}
     \caption{Segmento smarrito TCP.}
 \end{figure}
-\begin{figure}[h]
+\begin{figure}
     \centering
     \includegraphics[scale=0.29]{Immagini/TCPRitrasmissioneVeloce.png}
     \caption{Ritrasmissione veloce TCP.}
 \end{figure}
-\begin{figure}[h]
+\begin{figure}
     \centering
     \includegraphics[scale=0.27]{Immagini/TCPRiscontroPersoCorrettoDaRitrasmissione.png}
     \caption{Riscontro perso corretto da ritrasmissione TCP.}
 \end{figure}
-\begin{figure}[h]
+\begin{figure}
     \centering
     \includegraphics[scale=0.28]{Immagini/TCPRiscontroSmarrito.png}
     \caption{Ricontro smarrito TCP.}
 \end{figure}
 
-\newblock\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+\newblock\\\\\\\\\\\\\\\\\\\\\\\\
 \paragraph{Calcolo del Timeout}
 Il tempo ti timeout RTO come visto svolge un ruolo fondamentale per il corretto funzionamento del TCP ed è quindi necessario assegnargli un valore corretto.
 Questo deve essere maggiore di \textcolor{purple}{RTT} (Round Trip Time), ovvero il tempo trascorso dall'invio di un segmento alla ricezione del suo riscontro.
@@ -283,7 +283,6 @@ Il valore di a viene posto a 1/8 in modo da rendere via via meno importanti gli 
     \includegraphics[scale=0.46]{Immagini/EstimatedRTT.png}
     \caption{Ricontro smarrito TCP.}
 \end{figure}
-\newpage
 Oltre al valore RTT stimato è necessario anche una stima della variabilità di RTT data dalla seguente formula
 \begin{center}
     RTT\textsubscript{DEV} = (1-b) RTT\textsubscript{DEV} + b * $|$RTT\textsubscript{Sample} - RTT\textsubscript{Estimated}$|$
@@ -334,7 +333,6 @@ Il valore di rwnd viene calcolato come:
 \begin{center}
     Rwnd = RcvBuffer - (LastByteReceived - LastByteRead)
 \end{center}
-\newpage
 Il mittente si assicura che
 \begin{center}
     LastByteSent - LastByteAcked $<$= Rwnd
@@ -348,6 +346,7 @@ Se rwnd=0, il mittente manda segmenti "sonda" di 1 byte per ricevere aggiornamen
     \caption{Esempio trasmissione con finestra di ricezione.}
 \end{figure}
 
+\newpage
 \paragraph{Controllo di Congestione}
 
 Il fenomeno della \textcolor{purple}{congestione} è originato dal tentativo di più sorgenti di richiedere più banda di quella disponibile sul percorso, ovvero troppe sorgenti che trasmettono troppi dati a una velocità elevata per cui la rete non è in grado di gestirli.
@@ -362,5 +361,176 @@ TCP è in grado di implementare meccanismi di congestione senza bisogno di suppo
 
 In generale TCP è in grado di adattarsi alla velocità della rete. 
 Se infatti "percepisce" scarso traffico, aumenta la frequenza di invio altrimenti la diminuisce.
+\\\\NB: Dovendo gestire sia il controllo di congestione che di flusso la dimensione della finestra di invio in TCP è data valore minimo tra rwnd e cwnd. 
+Quindi la frequenza di invio non può superare min(rwnd,cwnd)/RTT. Più in generale cwnd/RTT impone un limite superiore alla frequenza di trasmissione.
 
+L'algoritmo che il mittente TCP utilizza per regolare la propria frequenza di invio in funzione della congestione rilevata, è costituito da quattro fasi:
+\begin{itemize}
+    \item \textcolor{purple}{Slow Start}
+    \item \textcolor{purple}{Additive Increase Multiplicative Decrease}
+    \item \textcolor{purple}{Fast Recovery}
+    \item \textcolor{purple}{Time-out Reaction}
+\end{itemize}
 
+\paragraph{Congestion Window}
+La \textcolor{purple}{Congestion Window} viene misurata in \textcolor{purple}{MMS} (Maximum Segment Size), cioè la quantità massima di dati che è possibile trasportare in un unico segmento.
+MMS viene determinato in base all MTU (Maximum Transmission Unit), lunghezza massima del payload del frame di collegamento inviabile dall’host mittente, in modo tale che il segmento TCP, incapsulato in pacchetto IP, stia dentro un singolo di frame di collegamento (valori tipici: 1460, 536, 512 byte, calcolati tolgliendo dall’MTU 20 byte header TCP + 20 byte header IP).
+Come vedremo l'andamento tipico della finestra nel tempo varia seguendo uno schema detto a dente di sega.
+
+\paragraph{Slow Start}
+All'inizio la finestra di congestione, è posta pari a 1 MSS (frequenza di invio 1 MSS/RTT). 
+Durante questa fase per raggiungere in fretta la saturazione della banda, la finestra di congestione viene incrementata di 1MSS ad ogni ACK (non duplicato).
+L’effetto è che la finestra di congestione raddoppia ad ogni RTT, crescita esponenziale.
+
+\paragraph{AIMD}
+TCP del mittente aumenta proporzionalmente la propria finestra di congestione ad ogni ACK ricevuto.
+Ad ogni ACK la finestra di congestione viene incrementata in modo che si abbia un crescita pari ad 1 MSS per ogni RTT (cwnd = cwnd+1/cwnd), \textcolor{purple}{Congestion avoidance}.
+
+\paragraph{TCP RENO}
+Nell' implementazione denominata \textcolor{purple}{RENO} viene inizialmente inizializzata una variabile detta di \textcolor{blue}{soglia} al quale viene assegnato un valore alto (es. 64KB).
+La soglia determina quando termina la fase di slow start ed inizia la fase di congestion avoidance.
+\begin{itemize}
+    \item Se \textcolor{blue}{cwnd $<$ soglia}, cwnd aumenta esponenzialmente (slow start).
+    \item Se \textcolor{blue}{cwnd $>$ soglia}, cwnd aumenta linearmente (Additive Increase).
+\end{itemize}
+La gestione degli eventi di perdita, scadenza del timer o 3 ACK duplicati consecutivi, vengono gestiti in modo diverso in base all'implementazione.
+In RENO gli eventi di perdita sono così gestiti
+\begin{itemize}
+    \item 3 ACK duplicati, viene posta la soglia a cwnd/2 e poi la finestra di trasmissione viene posta a soglia+3MMS. Questa operazione viene detta \textcolor{purple}{Fast Recovery}.
+    \item Scadenza del timer, viene posta la soglia a cwnd/2, la finestra di trasmissione a 1MMS e ricomincia con una fase di slow start.
+\end{itemize}
+Nella fase di fast recovery (si reinviano i segmenti di cui non abbiamo avuto ricontro)
+\begin{itemize}
+    \item se avviene un timeout si va in slow start;
+    \item finché continuano ad arrivare ACK duplicati cwnd=cwnd+1;
+    \item se arriva un nuovo ack (non duplicato) si va in congestion avoidance e cwnd=soglia (abbiamo ricevuto riscontro di tutti i vecchi segmenti e iniziamo a spedire i nuovi).
+\end{itemize}
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.28]{Immagini/TCPRENO.png}
+    \caption{TCP RENO.}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.30]{Immagini/TCPRENOScheme.png}
+    \caption{Schmea TCP RENO.}
+\end{figure}
+
+\newblock\\\\\\\\
+\paragraph{TCP Tahoe}
+\textcolor{purple}{TCP Tahoe} è una versione di TCP precedente a RENO nella quale gli eventi di perdita erano considerati tutti della stessa gravità e gestiti perciò allo stesso modo.
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.24]{Immagini/TCPTahoe.png}
+    \caption{TCP Tahoe.}
+\end{figure}
+
+\paragraph{TCP CUBIC}
+Un ulteriore implementazione di TCP è CUBIC (utilizzata per esmpio in Linux e in molti web server). 
+Si basa sull'idea che dato W\textsubscript{max}, il valore del rate di quanto si è rilevata la congestione, lo stato del collegamento probabilmente non è cambiato. 
+Sia allora k il punto in cui la cwnd raggiungerà W\textsubscript{max}, aumento di W come una funzione del \textcolor{blue}{cubo} della distanza tra l’istante di tempo attuale e k.
+\begin{itemize}
+    \item Incrementi maggiori quando siamo lontani da K;
+    \item Incrementi più piccoli quando siamo più vicini a K.
+\end{itemize}
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.37]{Immagini/TCPCUBIC.png}
+    \caption{TCP CUBIC.}
+\end{figure}
+
+\paragraph{Explicit Congestion Notification}
+Le implementazioni TCP spesso implementano un meccanismo di controllo di congestione \textcolor{purple}{network-assisted}
+\begin{itemize}
+    \item due bit in header IP (campo ToS) settati dai router per indicare la congestione;
+    \item Informazione di congestione inviata a destinazione;
+    \item La destinazione imposta il bit ECE (ECN-Echo) nel segmento di riscontro per notificare la congestione al mittente;
+    \item Il mittente setta il bit CWR (Congestion Window Reduced) per indicare che ha ricevuto la notifica di congestione.
+\end{itemize}
+
+\subsubsection{Throughput ed Equità}
+Per quanto visto fin'ora TCP, in regime stazionario e dato W il valore massimo della finestra di trasmissione, offre un throughput dato da 
+\begin{center}
+    (0.75 * W) / RTT
+\end{center}
+Inoltre date le ipotesi:
+\begin{itemize}
+    \item K connessioni TCP insistono su un unico link di capacità R bit/s;
+    \item Le connessioni hanno gli stessi valori di MSS e RTT;
+    \item Non ci sono altri protocolli che insistono sullo stesso link.
+\end{itemize}
+Si ha che ognuna delle connessioni TCP tende a trasmettere R/K bit/s e perciò TCP è equo.
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.37]{Immagini/EquitàTCP.png}
+    \caption{TCP CUBIC.}
+\end{figure}
+
+Nella pratica connessioni con RTT più piccolo variano più velocemente la loro finestra di congestione e raggiungono throughput superiori a connessioni con RTT maggiore.
+
+\paragraph{Connessioni Parallele}
+Un’applicazione può aprire connessioni multiple in parallelo tra due host in modo da garantirsi prestazioni migliori. Infatti gli host che aprono più connessioni parallele sfruttano l'equità di TCP a proprio vantaggio.
+\\Esempio:
+\\Collegamento con rate R con 9 connessioni esistenti:
+\begin{itemize}
+    \item se new-app apre una sessione TCP, ottiene un rate R/10;
+    \item se invece new-app apre 11 sessioni TCP, ottiene R/2.
+\end{itemize}
+
+\subsection{UDP}
+UDP è un protocollo meno complesso rispetto a quanto abbiamo visto con TCP. 
+Offre meno servizi ma è più indicato in contesti dove occorre un completo controllo della temporizzazione (non intesa come timing, ma per applicazioni time-sensitive come la trasmissione di dati multimediali).
+\\UDP offre un servizio di consegna a \textcolor{purple}{massimo sforzo}. I datagrammi possono essere persi o consegnati fuori sequenza. 
+Viene anche detto \textcolor{purple}{orientato al messaggio} poiché ogni datagramma è indipendente dagli altri e i processi che sfruttano questo protocollo devono inviare messaggi di dimensioni limitate, che possono essere incapsulati in un datagramma UDP.
+
+\paragraph{Caratteristiche}
+\begin{itemize}
+    \item Assenza di connessione, quindi non vengono introdotti ritardi dovuti alla gestione della connessione;
+    \item Semplicità, gli header sono formati da soli 8 byte e non presentando alcun tipo di controllo presenta un alto rate di invio;
+    \item Checksum facoltativo;
+\end{itemize}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.7]{Immagini/DatagramUDP.png}
+    \caption{Formato datagramma UDP.}
+\end{figure}
+
+Il checksum, se attivo, viene calcolato su tutto il datagramma e parte dell'header IP.
+Qunado il destinatario riceve un datagramma corrotto lo scarta senza comunicare niente al mittente.
+
+\paragraph{Calcolo del Checksum}
+Viene inizialmente settato il campo checksum a 0, il datagramma viene suddiviso in parole da 16 bit che vengono sommate in complemento a 1, con eventuali riporti sommati al risultato, e infine si calcola il complemento a 1 del totale.
+Questo valore verrà poi inserito nel campo checksum dell'header
+\\Il ricevente per controllare la correttezza del pacchetto calcola la checksum del datagramma ricevuto (incluso il campo checksum)
+\begin{itemize}
+    \item se il valore risultante è 0, allora il pacchetto non ha subito corruzioni;
+    \item altrimenti il pacchetto è corrotto e viene scartato.
+\end{itemize}
+
+NB: Questo procedimento è il medesimo utilizzato in TCP, nel quale però è obbligatorio.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.6]{Immagini/ChecksumUDP.png}
+    \caption{Calcolo del checksum.}
+\end{figure}
+
+\subsubsection{Vulnerabilità di UDP}
+Nonostante la maggiore semplicità di UDP questo, a differenza di TCP, è maggiormente suscettibile ad azioni malevole.
+I due principali attacchi ad UDP sono:
+\begin{itemize}
+    \item \textcolor{purple}{UDP Flood};
+    \item \textcolor{purple}{UDP Amplification}.
+\end{itemize} 
+
+Il primo è un attacco di tipo \textcolor{purple}{DOS} (Denial of Service) in cui un gran numero di pacchetti UDP viene inviato a un server obiettivo, con porta destinazione scelta in modo random.\
+Il server prima controlla se sono in esecuzione programmi che sono attualmente in attesa di richieste sulla porta specificata. 
+Se nessun programma riceve pacchetti su quella porta, il server risponde con un pacchetto ICMP per informare il mittente che la destinazione non è raggiungibile.
+Come risultato dell'utilizzo delle risorse da parte del server di destinazione per controllare e quindi rispondere ad ogni pacchetto UDP ricevuto, le risorse possono esaurirsi rapidamente, con conseguente denial-of-service al traffico normale.
+\\Nel secondo caso si sfrutta il fatto che UDP non verifica l'indirizzo IP di origine del datagramma e che alcuni protocolli applicativi che usano UDP possono generare risposte molto più grandi della richiesta iniziale.
+In questo modo è facile forgiare un pacchetto con indirizzo IP di origine arbitrario (in questo caso è l’IP della vittima).
+L’attaccante invia numerosi pacchetti UDP con l'indirizzo IP di origine falsificato ad un server di destinazione (o amplificatore).
+Il server risponde alla vittima (anziché all'attaccante), creando un attacco un attacco DOS di riflesso.
