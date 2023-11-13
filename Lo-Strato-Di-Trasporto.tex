@@ -441,7 +441,7 @@ Sia allora k il punto in cui la cwnd raggiungerà W\textsubscript{max}, aumento 
     \caption{TCP CUBIC.}
 \end{figure}
 
-\paragraph{Explicit congestion notification}
+\paragraph{Explicit Congestion Notification}
 Le implementazioni TCP spesso implementano un meccanismo di controllo di congestione \textcolor{purple}{network-assisted}
 \begin{itemize}
     \item due bit in header IP (campo ToS) settati dai router per indicare la congestione;
@@ -478,3 +478,59 @@ Un’applicazione può aprire connessioni multiple in parallelo tra due host in 
     \item se new-app apre una sessione TCP, ottiene un rate R/10;
     \item se invece new-app apre 11 sessioni TCP, ottiene R/2.
 \end{itemize}
+
+\subsection{UDP}
+UDP è un protocollo meno complesso rispetto a quanto abbiamo visto con TCP. 
+Offre meno servizi ma è più indicato in contesti dove occorre un completo controllo della temporizzazione (non intesa come timing, ma per applicazioni time-sensitive come la trasmissione di dati multimediali).
+\\UDP offre un servizio di consegna a \textcolor{purple}{massimo sforzo}. I datagrammi possono essere persi o consegnati fuori sequenza. 
+Viene anche detto \textcolor{purple}{orientato al messaggio} poiché ogni datagramma è indipendente dagli altri e i processi che sfruttano questo protocollo devono inviare messaggi di dimensioni limitate, che possono essere incapsulati in un datagramma UDP.
+
+\paragraph{Caratteristiche}
+\begin{itemize}
+    \item Assenza di connessione, quindi non vengono introdotti ritardi dovuti alla gestione della connessione;
+    \item Semplicità, gli header sono formati da soli 8 byte e non presentando alcun tipo di controllo presenta un alto rate di invio;
+    \item Checksum facoltativo;
+\end{itemize}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.7]{Immagini/DatagramUDP.png}
+    \caption{Formato datagramma UDP.}
+\end{figure}
+
+Il checksum, se attivo, viene calcolato su tutto il datagramma e parte dell'header IP.
+Qunado il destinatario riceve un datagramma corrotto lo scarta senza comunicare niente al mittente.
+
+\paragraph{Calcolo del Checksum}
+Viene inizialmente settato il campo checksum a 0, il datagramma viene suddiviso in parole da 16 bit che vengono sommate in complemento a 1, con eventuali riporti sommati al risultato, e infine si calcola il complemento a 1 del totale.
+Questo valore verrà poi inserito nel campo checksum dell'header
+\\Il ricevente per controllare la correttezza del pacchetto calcola la checksum del datagramma ricevuto (incluso il campo checksum)
+\begin{itemize}
+    \item se il valore risultante è 0, allora il pacchetto non ha subito corruzioni;
+    \item altrimenti il pacchetto è corrotto e viene scartato.
+\end{itemize}
+
+NB: Questo procedimento è il medesimo utilizzato in TCP, nel quale però è obbligatorio.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.6]{Immagini/ChecksumUDP.png}
+    \caption{Calcolo del checksum.}
+\end{figure}
+
+\subsubsection{Vulnerabilità di UDP}
+Nonostante la maggiore semplicità di UDP questo, a differenza di TCP, è maggiormente suscettibile ad azioni malevole.
+I due principali attacchi ad UDP sono:
+\begin{itemize}
+    \item \textcolor{purple}{UDP Flood};
+    \item \textcolor{purple}{UDP Amplification}.
+\end{itemize} 
+
+Il primo è un attacco di tipo \textcolor{purple}{DOS} (Denial of Service) in cui un gran numero di pacchetti UDP viene inviato a un server obiettivo, con porta destinazione scelta in modo random.\
+Il server prima controlla se sono in esecuzione programmi che sono attualmente in attesa di richieste sulla porta specificata. 
+Se nessun programma riceve pacchetti su quella porta, il server risponde con un pacchetto ICMP per informare il mittente che la destinazione non è raggiungibile.
+Come risultato dell'utilizzo delle risorse da parte del server di destinazione per controllare e quindi rispondere ad ogni pacchetto UDP ricevuto, le risorse possono esaurirsi rapidamente, con conseguente denial-of-service al traffico normale.
+\\Nel secondo caso si sfrutta il fatto che UDP non verifica l'indirizzo IP di origine del datagramma e che alcuni protocolli applicativi che usano UDP possono generare risposte molto più grandi della richiesta iniziale.
+In questo modo è facile forgiare un pacchetto con indirizzo IP di origine arbitrario (in questo caso è l’IP della vittima).
+L’attaccante invia numerosi pacchetti UDP con l'indirizzo IP di origine falsificato ad un server di destinazione (o amplificatore).
+Il server risponde alla vittima (anziché all'attaccante), creando un attacco un attacco DOS di riflesso.
