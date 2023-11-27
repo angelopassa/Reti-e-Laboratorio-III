@@ -3,6 +3,21 @@ import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.nio.file.StandardOpenOption;
 
+/*
+File di 381 KB:
+    Channel Indiretti: 8ms
+    Channel Diretti: 1ms
+    Transfer To: 16ms
+    Buffered Stream: 0ms
+    Not Buffered Stream: 1ms
+File di 6.8 MB:
+    Channel Indiretti: 16ms
+    Channel Diretti: 5ms
+    Transfer To: 12ms
+    Buffered Stream: 8ms
+    Not Buffered Stream: 12ms
+*/
+
 public class Main {
     public static void main(String[] args) {
         if (args.length < 2){
