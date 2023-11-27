@@ -152,3 +152,68 @@ Quindi dato un indirizzo a 32 bit di tipo \textcolor{blue}{a.b.c.d/n} diciamo ch
 \paragraph{Subnet Mask}
 La \textcolor{purple}{Subnet Mask} è un numero a 32 bit in cui i primi n bit sono impostati a 1 e i rimanenti a 0. Serve a distinguere quale parte di un indirizzo IP identifica la rete e quale l'host.
 Per conoscere l'indirizzo di rete da un indirizzo IP viene eseguita l'operazione di AND tra l'indirizzo e la subnet mask. In questo modo i primi n bit dell'idirizzo rimangono invariati e vengono azzerti quelli dalla posizione n in poi.
+
+\paragraph{Assegnazione di Blocchi di Indirizzi} Gli indirizzi IP sono gestiti da ICANN e vengono assegnati agli ISP in blocchi. 
+A loro volta gli ISP assegnano ai propri clienti sottoblocchi di indirizzi contigui. 
+\\Questo viene fatto tramite l'utilizzo della subnet mask:
+\begin{enumerate}
+    \item Dato un cliente che chiede un certo numero di indirizzi m, l'ISP trova il numero n potenza di due che contiene m (es m=120, n=128);
+    \item L'ISP avendo a disposizione un indirizzo di rete con un numero sufficientemente grande di indirizzi, calcola la lunghezza del prefisso di sottorete (subnet mask) come k=32-Log2(n);
+    \item Verranno quindi assegnati al cliente tutti gli indirizzi della sottorete identificata dalla subnet mask di valore k del blocco di indirizzi assegnato da ICANN all'ISP.
+\end{enumerate}
+Quando vengono richiesti più blocchi di sottorete di dimensione diversa, si parte da quello di dimensione maggiore in modo da suddividere la rete nel modo più corretto possibile.
+
+\paragraph{Aggregazione degli indirizzi}
+Il CIDR permette anche di aggregare i blocchi di indirizzi per rendere più efficiente l’instradamento. 
+Per capire cosa si intende con aggregazione facciamo l'esempio di un ISP che abbia 4 blocchi di sottorete con subnet mask di valore 24.
+In questo caso potrebbe decidere di "annunciare" all'esterno un uncio blocco, che contiene tutti gli indirizzi dei 4 sottoblocchi, che abbia però come valore della subnetmask 26.
+
+\paragraph{Indirizzi Speciali}
+Come per il classfull addressing anche in questo caso ci sono degli indirizzi speciali che vengon utilizzati per differenti scopi:
+\begin{itemize}
+    \item \textcolor{purple}{This-host 0.0.0.0:} Usato quando un host ha necessità di inviare un datagramma ma non conosce il proprio indirizzo IP;
+    \item \textcolor{purple}{Limited-broadcast 255.255.255.255:} Usato quando un router o un host devono inviare un datagramma a tutti i dispositivi che si trovano all’interno della rete. 
+    I router bloccano la propagazione alla sola rete locale;
+    \item \textcolor{purple}{Loopback 127.0.0.1:} il datagramma con questo indirizzo di destinazione non lascia l’host locale (localhost). Per test e debug;
+    \item \textcolor{purple}{Indirizzi privati,} quattro blocchi riservati per reti locali: \textcolor{blue}{10.0.0.0/8}, \textcolor{blue}{172.16.0.0/12}, \textcolor{blue}{192.168.0.0/16}, \textcolor{blue}{169.254.0.0/16};
+    \item \textcolor{purple}{Indirizzi multicast,} blocco 224.0.0.0/4.
+\end{itemize}
+
+\subsection{DHCP}
+Un indirizzo IP può essere attribuito all'interfaccia di un host secondo due distinte modalità:
+\begin{itemize}
+    \item \textcolor{purple}{Configurazione manuale:}l'amministratore configura direttamente nell'host l'indirizzo IP ed inserisce ulteriori informazioni di servizio (indirizzo gateway/router, netmask e indirizzo IP di almeno un server DNS);
+    \item \textbf{\textcolor{purple}{DHCP:}}l'host ottiene il proprio indirizzo e le altre informazioni in modo automatico.
+\end{itemize}
+
+\textcolor{purple}{DHCP} (Dynamic Host Configuration Protocol) è un protocollo di tipo client-server del \textcolor{purple}{Livello Applicativo}, inoltre il server DCHP solitamente risiede su un router. 
+Quando un host vuole entrare a far parte della rete i messaggi che vengono scambiati tra host e serevr sono i seguenti:
+\begin{enumerate}
+    \item \textcolor{purple}{DHCP Discover (opzionale):} L'host invia un messaggio in cui verifica la presenza di un DHCP server; 
+    \item \textcolor{purple}{DHCP Offer (opzionale):}  Il server DHCP risponde con un messaggio nel quale è presente un indirizzo utiliazzabile dall'host per quella rete.
+    \item \textcolor{purple}{DHCP Request:} L’host invia un messaggio nel quale richiede un certo indirizzo IP.
+    \item \textcolor{purple}{DHCP Ack:} Il server risponde con un messaggio di accettazione della richiesta se questa va a buono fine.
+\end{enumerate}
+
+I primi due passaggi sono opzionali perché se un host è precedentemente entrato a far parte della rete ma il suo indirizzo è in scadenza (gli indirizzi forniti dal server DHCP hanno un tempo di vita prestabilito, specificato nella DHCP Offer), può richiederne il rinnovo inviando una DHCP Request.
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.29]{Immagini/DHCPRequest.png}
+    \caption{Interazione con protocollo DHCP.}
+\end{figure}
+\\Tutti questi messaggi vengono inviati in broadcast perché l'host non ha ancora ricevuto il suo indirizzo IP. 
+Inoltre DHCP può restituire ulteriori informazioni come: indirizzo del gateway/router, Subnet Mask, nome e indirizzo IP di almeno un server DNS.
+Il protocollo di trasporto utilizzato da DHCP è UDP.
+
+\subsection{Forwarding}
+Ogni datagramma IP è soggetto a “forwarding” da parte dell'host di origine e del router che sta attraversando. L'inoltro di un pacchetto verso l’uscita usa i servizi del livello collegamento e può essere: 
+\begin{itemize}
+    \item \textcolor{purple}{Diretto,} il datagramma IP ha come destinazione un host nella propria rete (o sottrete) IP. L'invio è diretto al destintario e l'indirizzo di destinazione a livello collegamento è il \textcolor{purple}{MAC Address} di quest'ultimo.
+    \item \textcolor{purple}{Indiretto,} il datagramma IP ha come destinazione un host di un'altra rete. In qesto caso l'invio viene delegato al router e l'indirizzo di destinazione a livello link è il MAC Address del router.
+\end{itemize}
+
+Le condizioni che garantiscono il corretto funzionamneto della comunicazione sono:
+\begin{itemize}
+    \item l' esista un cammino diretto, a livello di collegamento, tra tutti gli host che appartengono ad una stessa sottorete;
+    \item la corenza tra i \textcolor{blue}{net id} degli host coinvolti con \textcolor{blue}{host id} univoci nella sottorete, 
+\end{itemize}
